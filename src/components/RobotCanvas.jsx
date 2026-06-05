@@ -96,14 +96,16 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       onUpdate(self) {
         const p = self.progress;
         
-        // Lowered final Y from 0.12 to -0.10 to center it inside the translucent body
         groups.pcb.position.y = L(-6.0, -0.10, p); 
-        groups.pcb.rotation.y = L(0.6, 0, p);
+        // Changed target from 0 to Math.PI / 2 (90 degrees)
+        groups.pcb.rotation.y = L(0.6, Math.PI / 2, p);
 
-        // Lowered final Y from 0.32 to 0.10 to maintain the exact 0.20 unit gap with the PCB
         groups.mpu.position.y = p < 0.6
           ? L(0, 0.55, p / 0.6)
           : L(0.55, 0.10, (p - 0.6) / 0.4);
+          
+        // Added this line so the MPU rotates 90 degrees with the PCB!
+        groups.mpu.rotation.y = L(0, Math.PI / 2, p);
           
         camera.position.set(L(4, 3, p), L(3, 3.5, p), L(7, 7.5, p));
       },
@@ -120,9 +122,10 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
         const p = self.progress;
         groups.chassis.position.y = L(9.0, 0, p);
         groups.chassis.scale.setScalar(L(0.25, 1.0, p));
-        groups.chassis.rotation.y = L(-Math.PI * 0.35, 0, p);
         
-        // Camera blends from PCB end (3, 3.5, 7.5) to Chassis end (5.5, 4.0, 9.5)
+        // Changed target from 0 to Math.PI / 2 (90 degrees)
+        groups.chassis.rotation.y = L(-Math.PI * 0.35, Math.PI / 2, p);
+        
         camera.position.set(L(3, 5.5, p), L(3.5, 4.0, p), L(7.5, 9.5, p));
       },
     });
@@ -136,7 +139,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
-        groups.sensors.position.set(L(2.5, 0, p), L(9.0, 0.85, p), 0.3);
+        groups.sensors.position.set(L(2.5, 0, p), L(9.0, 0.69, p), 0.0);
         groups.sensors.rotation.y = L(Math.PI * 0.5, 0, p);
         
         // Camera smoothly arcs up from Chassis (5.5, 4.0, 9.5) to view the Mast (2.5, 5.5, 8.5)
@@ -225,18 +228,20 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
         groups.roverMaster.position.y = Math.sin(time * 1.2) * 0.03;
       }
 
-      // LiDAR scan plane rotates when mast is in scene
-      if (groups.sensors?.position.y < 2) {
+      // Check if the rover is fully activated based on LED intensity
+      const activated = groups.chassisLeds?.[0]?.material?.emissiveIntensity > 0.5;
+
+      // LiDAR scan plane rotates ONLY when activated
+      if (activated && groups.sensors) {
         groups.sensors.children.forEach(child => {
-          if (child.geometry?.type === 'PlaneGeometry') {
-            child.rotation.y += dt * 1.4;
+          if (child.geometry?.type === 'CircleGeometry') {
+            child.rotation.z += dt * 2 * Math.PI;
           }
         });
       }
 
       // Wheel spin (slow idle always, faster on activation)
       if (groups.wheelMeshes) {
-        const activated = groups.chassisLeds?.[0]?.material?.emissiveIntensity > 0.5;
         groups.wheelMeshes.forEach((wheel, i) => {
           wheel.rotation.z += dt * (activated ? 2.8 : 0.4) * (i % 2 === 0 ? 1 : -1);
         });

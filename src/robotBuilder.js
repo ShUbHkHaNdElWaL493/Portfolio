@@ -142,7 +142,11 @@ export function buildRobot(scene) {
   const pcbBoard = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.08, 2.5), mats.green);
   pcbGroup.add(pcbBoard);
 
-  const pcbEdge = new THREE.Mesh(new THREE.BoxGeometry(3.52, 0.10, 2.52), mats.greenWire);
+  const edgeGeom = new THREE.EdgesGeometry(new THREE.BoxGeometry(3.52, 0.10, 2.52));
+  const pcbEdge = new THREE.LineSegments(
+    edgeGeom, 
+    new THREE.LineBasicMaterial({ color: 0x00FF88 })
+  );
   pcbGroup.add(pcbEdge);
 
   // 1. MPU Socket Pads & Through-holes (Matches MPU pin layout)
@@ -326,80 +330,7 @@ export function buildRobot(scene) {
   groups.pcb = pcbGroup;
 
   // ════════════════════════════════════════════════════════════════
-  // PHASE 3 — SENSOR MAST
-  // Mast pole + camera head + stereo lenses + LiDAR ring + IMU
-  // ════════════════════════════════════════════════════════════════
-  const sensorGroup = new THREE.Group();
-  sensorGroup.name = 'sensors';
-
-  // Mast base bracket
-  const mastBase = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.28), mats.dark);
-  mastBase.position.set(0, 0, 0);
-  sensorGroup.add(mastBase);
-
-  // Mast pole — tapered cylinder
-  const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.09, 2.0, 10), mats.silver);
-  mastPole.position.set(0, 1.0, 0);
-  sensorGroup.add(mastPole);
-
-  // Cable conduit along mast
-  const conduit = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.9, 6), new THREE.MeshBasicMaterial({ color: 0xFF7A00, opacity: 0.6, transparent: true }));
-  conduit.position.set(0.07, 1.0, 0.05);
-  sensorGroup.add(conduit);
-
-  // Camera head box
-  const camHead = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.28, 0.28), mats.dark);
-  camHead.position.set(0, 2.05, 0.04);
-  sensorGroup.add(camHead);
-
-  // Stereo camera lenses
-  const lensGeom = new THREE.CylinderGeometry(0.07, 0.07, 0.09, 16);
-  lensGeom.rotateX(Math.PI / 2);
-  const lensInnerGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.10, 16);
-  lensInnerGeom.rotateX(Math.PI / 2);
-
-  [-0.13, 0.13].forEach(xOff => {
-    const lens = new THREE.Mesh(lensGeom, mats.glass);
-    lens.position.set(xOff, 2.05, 0.17);
-    sensorGroup.add(lens);
-
-    const lensInner = new THREE.Mesh(lensInnerGeom, new THREE.MeshBasicMaterial({ color: 0x001122, opacity: 0.9, transparent: true }));
-    lensInner.position.set(xOff, 2.05, 0.18);
-    sensorGroup.add(lensInner);
-  });
-
-  // LiDAR drum on top of mast
-  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.14, 20), mats.dark);
-  lidar.position.set(0, 2.28, 0);
-  sensorGroup.add(lidar);
-
-  // LiDAR emission ring (orange torus)
-  const lidarRing = new THREE.Mesh(new THREE.TorusGeometry(0.20, 0.018, 8, 40), mats.orange);
-  lidarRing.position.set(0, 2.30, 0);
-  sensorGroup.add(lidarRing);
-
-  // LiDAR scan slice (thin plane)
-  const scanMat = new THREE.MeshBasicMaterial({ color: 0xFF7A00, opacity: 0.12, transparent: true, side: THREE.DoubleSide });
-  const scanPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 3.0, 12, 12), scanMat);
-  scanPlane.position.set(0, 2.30, 0);
-  sensorGroup.add(scanPlane);
-
-  // IMU box
-  const imu = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.07, 0.13), mats.silver);
-  imu.position.set(0.22, 1.88, 0);
-  sensorGroup.add(imu);
-
-  // Antenna wire
-  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.5, 4), mats.silver);
-  antenna.position.set(-0.18, 2.55, 0);
-  sensorGroup.add(antenna);
-
-  sensorGroup.position.set(0, 8.0, 0.3); // starts above — animates down
-  roverGroup.add(sensorGroup);
-  groups.sensors = sensorGroup;
-
-  // ════════════════════════════════════════════════════════════════
-  // PHASE 4 — CHASSIS
+  // PHASE 3 — CHASSIS
   // Tubular structural frame, suspended inner housing, twin solar arrays
   // ════════════════════════════════════════════════════════════════
   const chassisGroup = new THREE.Group();
@@ -608,8 +539,42 @@ export function buildRobot(scene) {
       panelGroup.add(edge);
     });
 
-    panelGroup.position.set(xPos, 0.53, 0);
+    panelGroup.position.set(xPos, 0.45, 0);
     chassisGroup.add(panelGroup);
+  });
+
+  // 6b. Solar Panel Structural Tie-Rods
+  // Connects outer panel edges to the chassis, and bridges the inner gap
+  const pY = 0.45; // Sits just under the solar panel deck
+  const pOutX = 1.75; // Absolute X coordinate of panel outer edge
+  const pOutZ = 1.1;  // Absolute Z coordinate of panel front/back edge
+  const cOutX = 2.1;  // Chassis outer post X
+  const cOutY = 0.45; // Chassis outer post Y
+  const cOutZ = 1.4;  // Chassis outer post Z
+
+  // A. Outer Corner Struts (Angled down to the chassis corners)
+  signs.forEach(xSign => {
+    signs.forEach(zSign => {
+      const pPanel = new THREE.Vector3(xSign * pOutX, pY, zSign * pOutZ);
+      const pChassis = new THREE.Vector3(xSign * cOutX, cOutY, zSign * cOutZ);
+      
+      const dist = pPanel.distanceTo(pChassis);
+      const dir = new THREE.Vector3().subVectors(pChassis, pPanel).normalize();
+      
+      const strut = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, dist, radialSegs), frameMat);
+      strut.position.copy(pPanel).lerp(pChassis, 0.5);
+      strut.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      chassisGroup.add(strut);
+    });
+  });
+
+  // B. Inner Corner Cross-Braces (Bridging the center channel)
+  signs.forEach(zSign => {
+    // Spans exactly 0.5 units wide (from x=-0.25 to x=0.25) connecting the panels
+    const bridge = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, 0.5, radialSegs), frameMat);
+    bridge.rotation.z = Math.PI / 2;
+    bridge.position.set(0, pY, zSign * pOutZ);
+    chassisGroup.add(bridge);
   });
 
   // 7. Chassis status LEDs
@@ -627,11 +592,121 @@ export function buildRobot(scene) {
   });
   groups.chassisLeds = chassisLeds;
 
+  // 8. Sensor Mast Mounting Interface
+  const mountGroup = new THREE.Group();
+  mountGroup.position.set(0, 0.45, 0); 
+
+  // Base bolted plate
+  const basePlate = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.06, 0.48), mats.dark);
+  mountGroup.add(basePlate);
+
+  signs.forEach(zSign => {
+    // Spans exactly 0.5 units wide (from x=-0.25 to x=0.25) connecting the panels
+    const bridge = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, 0.5, radialSegs), frameMat);
+    bridge.rotation.z = Math.PI / 2;
+    bridge.position.set(0, pY, zSign * 0.24);
+    chassisGroup.add(bridge);
+  });
+
+  // Raised mechanical locking collar
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.12, 16), mats.silver);
+  collar.position.set(0, 0.08, 0);
+  mountGroup.add(collar);
+
+  // Internal Data/Power Socket (Gold-plated contacts)
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, metalness: 0.9, roughness: 0.2 });
+  const socket = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.13, 16), goldMat);
+  socket.position.set(0, 0.08, 0);
+  mountGroup.add(socket);
+
+  // Alignment pins for precision mating
+  [-0.08, 0.08].forEach(x => {
+    const pin1 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.20, 8), mats.silver);
+    const pin2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.20, 8), mats.silver);
+    pin1.position.set(x, 0.10, 0);
+    pin2.position.set(0, 0.10, x);
+    mountGroup.add(pin1);
+    mountGroup.add(pin2);
+  });
+
+  chassisGroup.add(mountGroup);
+
   chassisGroup.position.set(0, 8.0, 0); 
   chassisGroup.scale.setScalar(0.3); 
   
   roverGroup.add(chassisGroup);
   groups.chassis = chassisGroup;
+
+  // ════════════════════════════════════════════════════════════════
+  // PHASE 4 — SENSOR MAST
+  // Mast pole + camera head + stereo lenses + LiDAR ring + IMU
+  // ════════════════════════════════════════════════════════════════
+  const sensorGroup = new THREE.Group();
+  sensorGroup.name = 'sensors';
+
+  // Mast base bracket
+  const mastBase = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.15, 0.2, 16), mats.dark);
+  mastBase.position.set(0, 0, 0);
+  sensorGroup.add(mastBase);
+
+  // Mast pole — tapered cylinder
+  const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.09, 2.0, 8), mats.silver);
+  mastPole.position.set(0, 1.0, 0);
+  sensorGroup.add(mastPole);
+
+  // Camera head box
+  const camHead = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.28, 0.28), mats.dark);
+  camHead.position.set(0, 2.05, 0.04);
+  sensorGroup.add(camHead);
+
+  // Stereo camera lenses
+  const lensGeom = new THREE.CylinderGeometry(0.07, 0.07, 0.09, 16);
+  lensGeom.rotateX(Math.PI / 2);
+  const lensInnerGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.10, 16);
+  lensInnerGeom.rotateX(Math.PI / 2);
+
+  [-0.13, 0.13].forEach(xOff => {
+    const lens = new THREE.Mesh(lensGeom, mats.glass);
+    lens.position.set(xOff, 2.05, 0.17);
+    sensorGroup.add(lens);
+
+    const lensInner = new THREE.Mesh(lensInnerGeom, new THREE.MeshBasicMaterial({ color: 0x001122, opacity: 0.9, transparent: true }));
+    lensInner.position.set(xOff, 2.05, 0.18);
+    sensorGroup.add(lensInner);
+  });
+
+  // LiDAR drum on top of mast
+  const lidar = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.14, 20), mats.dark);
+  lidar.position.set(0, 2.28, 0);
+  sensorGroup.add(lidar);
+
+  // LiDAR emission ring (orange torus)
+  const lidarRing = new THREE.Mesh(new THREE.TorusGeometry(0.20, 0.018, 8, 40), mats.orange);
+  lidarRing.position.set(0, 2.30, 0);
+  lidarRing.rotation.x = Math.PI / 2;
+  sensorGroup.add(lidarRing);
+
+  // LiDAR scan slice (thin plane)
+  const scanMat = new THREE.MeshBasicMaterial({ 
+    color: 0xFF7A00, 
+    opacity: 0.08, 
+    transparent: true, 
+    side: THREE.DoubleSide,
+    depthWrite: false, 
+    blending: THREE.AdditiveBlending 
+  });
+
+  const scanPlane = new THREE.Mesh(new THREE.CircleGeometry(2.5, 32, 0, Math.PI / 4), scanMat);
+  scanPlane.position.set(0, 2.30, 0);
+  scanPlane.rotation.set(Math.PI / 2, 0, 0);
+  
+  // Force the scan plane to render on top of the transparent glass lenses
+  scanPlane.renderOrder = 1;
+  sensorGroup.add(scanPlane);
+
+  sensorGroup.position.set(0, 8.0, 0.3); // starts above — animates down
+  roverGroup.add(sensorGroup);
+  groups.sensors = sensorGroup;
 
   // ════════════════════════════════════════════════════════════════
   // PHASE 5 — WHEELS + ROCKER-BOGIE SUSPENSION
