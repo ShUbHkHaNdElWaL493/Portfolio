@@ -134,7 +134,7 @@ export function buildRobot(scene) {
 
   // ════════════════════════════════════════════════════════════════
   // PHASE 2 — PCB (Printed Circuit Board)
-  // Green substrate + trace overlays + capacitors + connectors
+  // Green substrate + MPU socket + dense realistic component layout
   // ════════════════════════════════════════════════════════════════
   const pcbGroup = new THREE.Group();
   pcbGroup.name = 'pcb';
@@ -142,60 +142,187 @@ export function buildRobot(scene) {
   const pcbBoard = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.08, 2.5), mats.green);
   pcbGroup.add(pcbBoard);
 
-  // PCB wireframe edge highlight
   const pcbEdge = new THREE.Mesh(new THREE.BoxGeometry(3.52, 0.10, 2.52), mats.greenWire);
   pcbGroup.add(pcbEdge);
 
-  // Copper traces
-  const traceMat = new THREE.MeshBasicMaterial({ color: 0x00FF88, opacity: 0.35, transparent: true });
-  for (let i = 0; i < 6; i++) {
-    const trace = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.015, 0.02), traceMat);
-    trace.position.set(0, 0.05, -1.0 + i * 0.4);
-    pcbGroup.add(trace);
-  }
-  // Vertical traces
-  for (let i = 0; i < 4; i++) {
-    const trace = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.015, 1.8), traceMat);
-    trace.position.set(-1.2 + i * 0.8, 0.05, 0);
-    pcbGroup.add(trace);
+  // 1. MPU Socket Pads & Through-holes (Matches MPU pin layout)
+  const padGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.085, 12);
+  const holeGeom = new THREE.CylinderGeometry(0.025, 0.025, 0.086, 8);
+  const padMat = new THREE.MeshBasicMaterial({ color: 0xcca600 }); // Gold
+  const holeMat = new THREE.MeshBasicMaterial({ color: 0x050608 }); // Deep hole
+
+  for (let i = 0; i < 8; i++) {
+    const xPos = -0.60 + i * 0.175;
+    [-0.45, 0.45].forEach(zPos => {
+      const pad = new THREE.Mesh(padGeom, padMat);
+      pad.position.set(xPos, 0, zPos);
+      pcbGroup.add(pad);
+      
+      const hole = new THREE.Mesh(holeGeom, holeMat);
+      hole.position.set(xPos, 0, zPos);
+      pcbGroup.add(hole);
+    });
   }
 
-  // Electrolytic capacitors
-  for (let i = 0; i < 5; i++) {
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.20, 8), mats.silver);
-    cap.position.set(-1.3 + i * 0.65, 0.16, 1.05);
+  // 2. Power Regulation Array (Electrolytic Caps + Inductor)
+  for (let i = 0; i < 3; i++) {
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.25, 12), mats.silver);
+    cap.position.set(1.1, 0.165, -0.7 + i * 0.4);
     pcbGroup.add(cap);
-    const capTop = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), new THREE.MeshBasicMaterial({ color: 0xdddddd }));
-    capTop.position.set(cap.position.x, 0.27, 1.05);
+    
+    const capTop = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.02, 12), new THREE.MeshBasicMaterial({ color: 0x222222 }));
+    capTop.position.set(cap.position.x, 0.29, cap.position.z);
     pcbGroup.add(capTop);
   }
 
-  // SMD resistors / ICs
-  for (let i = 0; i < 4; i++) {
-    const smd = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.08), mats.dark);
-    smd.position.set(-1.0 + i * 0.55, 0.07, -0.8);
-    pcbGroup.add(smd);
+  // Power Inductor (Dark flat cylinder)
+  const inductor = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16), mats.dark);
+  inductor.position.set(1.1, 0.10, 0.6);
+  pcbGroup.add(inductor);
+
+  // 3. Secondary ICs (Smaller logic chips)
+  const createIC = (x, z, length, width) => {
+    const ic = new THREE.Mesh(new THREE.BoxGeometry(length, 0.06, width), mats.dark);
+    ic.position.set(x, 0.07, z);
+    pcbGroup.add(ic);
+    
+    // Silver pins along the sides
+    const pinMat = mats.silver;
+    const pinCount = Math.floor(length / 0.08);
+    for(let i = 0; i < pinCount; i++) {
+      const px = x - (length/2) + 0.04 + (i * 0.08);
+      const pinGeom = new THREE.BoxGeometry(0.02, 0.04, width + 0.04);
+      const pins = new THREE.Mesh(pinGeom, pinMat);
+      pins.position.set(px, 0.05, z);
+      pcbGroup.add(pins);
+    }
+  };
+
+  createIC(-1.0, 0.8, 0.4, 0.2);  // Top left IC
+  createIC(-1.0, -0.8, 0.4, 0.2); // Bottom left IC
+  createIC(0.4, 0.9, 0.3, 0.3);   // Top right square IC
+
+  // 4. SOT-23 Transistors
+  const createTransistor = (x, z, rotY) => {
+    const transGroup = new THREE.Group();
+    
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.06), mats.dark);
+    body.position.set(0, 0.06, 0);
+    transGroup.add(body);
+
+    const legGeom = new THREE.BoxGeometry(0.02, 0.04, 0.02);
+    const leg1 = new THREE.Mesh(legGeom, mats.silver);
+    leg1.position.set(-0.025, 0.04, 0.035);
+    transGroup.add(leg1);
+    
+    const leg2 = new THREE.Mesh(legGeom, mats.silver);
+    leg2.position.set(0.025, 0.04, 0.035);
+    transGroup.add(leg2);
+    
+    const leg3 = new THREE.Mesh(legGeom, mats.silver);
+    leg3.position.set(0, 0.04, -0.035);
+    transGroup.add(leg3);
+
+    transGroup.position.set(x, 0, z);
+    transGroup.rotation.y = rotY;
+    pcbGroup.add(transGroup);
+  };
+
+  createTransistor(0.3, -0.8, 0);
+  createTransistor(0.5, -0.8, Math.PI / 2);
+  createTransistor(-0.2, 0.85, Math.PI);
+
+  // 5. Dense SMD Resistors & Capacitors Arrays
+  const smdGeom = new THREE.BoxGeometry(0.06, 0.03, 0.03);
+  const smdSilverGeom = new THREE.BoxGeometry(0.064, 0.032, 0.01);
+  
+  const createSMD = (x, z, rotY = 0, isCapacitor = false) => {
+    const smdGroup = new THREE.Group();
+    const bodyColor = isCapacitor ? 0xaa8855 : 0x111111; 
+    const body = new THREE.Mesh(smdGeom, new THREE.MeshPhongMaterial({ color: bodyColor }));
+    smdGroup.add(body);
+    
+    // Silver end caps
+    [-0.025, 0.025].forEach(xOff => {
+      const end = new THREE.Mesh(smdSilverGeom, mats.silver);
+      end.position.set(xOff, 0, 0);
+      end.rotation.y = Math.PI / 2;
+      smdGroup.add(end);
+    });
+
+    smdGroup.position.set(x, 0.055, z);
+    smdGroup.rotation.y = rotY;
+    pcbGroup.add(smdGroup);
+  };
+
+  for (let i = 0; i < 5; i++) {
+    createSMD(-0.7, 0.65 + i * 0.06, 0, true);   
+    createSMD(-0.5 + i * 0.1, -0.65, 0, false);  
+    createSMD(-1.0, -0.2 + i * 0.08, 0, false);
   }
 
-  // Edge connectors
-  const connGeom = new THREE.BoxGeometry(0.4, 0.14, 0.15);
-  [-1.1, -0.8, -0.5].forEach(z => {
+  // 6. Ethernet Connectors (RJ45)
+  const ethGroup = new THREE.Group();
+  const ethBody = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.28, 0.45), mats.silver);
+  ethBody.position.set(0, 0.14, 0);
+  ethGroup.add(ethBody);
+
+  const ethHole = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.18, 0.1), mats.dark);
+  ethHole.position.set(0, 0.12, 0.23); // Pushed to the front face
+  ethGroup.add(ethHole);
+
+  [-0.2, 0.5].forEach(z => {
+    const eth = ethGroup.clone();
+    eth.position.set(-1.55, 0, z);
+    eth.rotation.y = -Math.PI / 2;
+    pcbGroup.add(eth);
+  });
+
+  // 7. XT60 Power Connectors
+  const xt60Mat = new THREE.MeshPhongMaterial({ color: 0xffaa00, shininess: 20 }); // Classic Nylon Yellow/Orange
+  const xtGroup = new THREE.Group();
+  
+  const xtBody = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.14), xt60Mat);
+  xtBody.position.set(0, 0.08, 0);
+  xtGroup.add(xtBody);
+
+  // Brass Pins
+  const pinGeom = new THREE.CylinderGeometry(0.03, 0.03, 0.06, 8);
+  [-0.05, 0.05].forEach(x => {
+    const pin = new THREE.Mesh(pinGeom, padMat);
+    pin.position.set(x, 0.08, 0.08);
+    pin.rotation.x = Math.PI / 2;
+    xtGroup.add(pin);
+  });
+
+  // Place them near the power regulation array on the bottom-right edge
+  [1.0, 1.4].forEach(x => {
+    const xt = xtGroup.clone();
+    xt.position.set(x, 0, -1.15);
+    pcbGroup.add(xt);
+  });
+
+  // 8. General Edge Connectors
+  const connGeom = new THREE.BoxGeometry(0.4, 0.14, 0.25);
+  [-0.8, 0, 0.8].forEach(z => {
     const conn = new THREE.Mesh(connGeom, mats.dark);
     conn.position.set(1.55, 0.09, z);
     pcbGroup.add(conn);
   });
 
-  // Mount holes (cylinders punched through)
-  const holeGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.12, 12);
-  const holeMat = new THREE.MeshBasicMaterial({ color: 0x07080a });
-  [[-1.5, 1.1], [1.5, 1.1], [-1.5, -1.1], [1.5, -1.1]].forEach(([x, z]) => {
-    const hole = new THREE.Mesh(holeGeom, holeMat);
-    hole.position.set(x, 0.06, z);
+  // 9. Mount holes (Symmetrical corners punched through)
+  const mountHoleGeom = new THREE.CylinderGeometry(0.08, 0.08, 0.12, 16);
+  const mountHoleMat = new THREE.MeshBasicMaterial({ color: 0x07080a });
+  [[-1.5, 1.05], [1.5, 1.05], [-1.5, -1.05], [1.5, -1.05]].forEach(([x, z]) => {
+    const hole = new THREE.Mesh(mountHoleGeom, mountHoleMat);
+    hole.position.set(x, 0, z);
     pcbGroup.add(hole);
   });
 
   pcbGroup.position.set(0, -6.0, 0); // starts below — animated in
-  roverGroup.add(pcbGroup);
+  
+  // Attach to master group
+  roverGroup.add(pcbGroup); 
   groups.pcb = pcbGroup;
 
   // ════════════════════════════════════════════════════════════════
