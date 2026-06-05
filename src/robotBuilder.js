@@ -76,6 +76,11 @@ export function buildRobot(scene) {
 
   const groups = {};
 
+  const roverGroup = new THREE.Group();
+  roverGroup.name = 'roverMaster';
+  scene.add(roverGroup);
+  groups.roverMaster = roverGroup;
+
   // ════════════════════════════════════════════════════════════════
   // PHASE 1 — MPU (Micro Processing Unit)
   // A flat IC package with die, pin rows, and status LEDs
@@ -124,7 +129,7 @@ export function buildRobot(scene) {
   groups.mpuLeds = mpuLeds;
 
   mpuGroup.position.set(0, 0, 0);
-  scene.add(mpuGroup);
+  roverGroup.add(mpuGroup);
   groups.mpu = mpuGroup;
 
   // ════════════════════════════════════════════════════════════════
@@ -190,7 +195,7 @@ export function buildRobot(scene) {
   });
 
   pcbGroup.position.set(0, -6.0, 0); // starts below — animated in
-  scene.add(pcbGroup);
+  roverGroup.add(pcbGroup);
   groups.pcb = pcbGroup;
 
   // ════════════════════════════════════════════════════════════════
@@ -263,7 +268,7 @@ export function buildRobot(scene) {
   sensorGroup.add(antenna);
 
   sensorGroup.position.set(0, 8.0, 0.3); // starts above — animates down
-  scene.add(sensorGroup);
+  roverGroup.add(sensorGroup);
   groups.sensors = sensorGroup;
 
   // ════════════════════════════════════════════════════════════════
@@ -335,7 +340,7 @@ export function buildRobot(scene) {
 
   chassisGroup.position.set(0, 8.0, 0); // starts above — animates into place
   chassisGroup.scale.setScalar(0.3);
-  scene.add(chassisGroup);
+  roverGroup.add(chassisGroup);
   groups.chassis = chassisGroup;
 
   // ════════════════════════════════════════════════════════════════
@@ -423,7 +428,7 @@ export function buildRobot(scene) {
   });
 
   wheelsGroup.position.set(0, 8.0, 0); // starts above — bolts in on scroll
-  scene.add(wheelsGroup);
+  roverGroup.add(wheelsGroup);
   groups.wheels = wheelsGroup;
 
   // ════════════════════════════════════════════════════════════════
@@ -433,20 +438,20 @@ export function buildRobot(scene) {
   gridHelper.material.opacity = 0.22;
   gridHelper.material.transparent = true;
   gridHelper.position.y = -0.95;
-  scene.add(gridHelper);
+  roverGroup.add(gridHelper);
   groups.grid = gridHelper;
 
   const axisHelper = new THREE.AxesHelper(1.8);
   axisHelper.position.set(-6.5, -0.9, -5.5);
-  scene.add(axisHelper);
+  roverGroup.add(axisHelper);
 
   // Origin cross-hair (floor)
   const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.005, 0.02), new THREE.MeshBasicMaterial({ color: 0xFF7A00, opacity: 0.4, transparent: true }));
   crossH.position.y = -0.94;
-  scene.add(crossH);
+  roverGroup.add(crossH);
   const crossV = crossH.clone();
   crossV.rotation.y = Math.PI / 2;
-  scene.add(crossV);
+  roverGroup.add(crossV);
 
   return { groups, mats };
 }

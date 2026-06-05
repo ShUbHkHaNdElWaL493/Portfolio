@@ -141,8 +141,3 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 The LED materials already set `emissiveIntensity` high enough to trigger
 the default luminance threshold.
-
----
-
-## License
-MIT — free to use, modify, and deploy. Attribution appreciated but not required.

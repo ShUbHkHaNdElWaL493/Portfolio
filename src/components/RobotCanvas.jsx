@@ -84,12 +84,14 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
     // Helper: lerp inside ScrollTrigger.onUpdate
     const L = gsap.utils.interpolate;
 
+    let mpuIdleWeight = 1;
+
     // Phase 1 → 2 : PCB rises + MPU snaps onto it
     ScrollTrigger.create({
       trigger: sectionRefs.current[1],
       scroller,
       start: 'top 90%',
-      end: 'bottom 10%',
+      end: 'center center',
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
@@ -98,6 +100,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
         groups.mpu.position.y = p < 0.6
           ? L(0, 0.55, p / 0.6)
           : L(0.55, 0.32, (p - 0.6) / 0.4);
+          
         camera.position.set(L(4, 3, p), L(3, 3.5, p), L(7, 7.5, p));
       },
     });
@@ -206,10 +209,10 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       lastTime = t;
       const time = t * 0.001;
 
-      // Idle MPU gentle bob + rotate in phase 1
-      if (groups.mpu) {
-        groups.mpu.rotation.y = Math.sin(time * 0.45) * 0.25;
-        groups.mpu.position.y += Math.sin(time * 1.2) * 0.0003;
+      // Apply the idle float and rotation to the entire assembled system
+      if (groups.roverMaster) {
+        groups.roverMaster.rotation.y = Math.sin(time * 0.45) * 0.25;
+        groups.roverMaster.position.y = Math.sin(time * 1.2) * 0.03;
       }
 
       // LiDAR scan plane rotates when mast is in scene
