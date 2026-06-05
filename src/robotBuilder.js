@@ -400,73 +400,236 @@ export function buildRobot(scene) {
 
   // ════════════════════════════════════════════════════════════════
   // PHASE 4 — CHASSIS
-  // Structural frame (wireframe + solid), solar panel, struts, LEDs
+  // Tubular structural frame, suspended inner housing, twin solar arrays
   // ════════════════════════════════════════════════════════════════
   const chassisGroup = new THREE.Group();
   chassisGroup.name = 'chassis';
 
-  // Main body — solid inner + wireframe outer
-  const mainFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.80, 2.0), mats.chassisSolid);
+  // Shared variables moved to the top
+  const frameMat = mats.silver;
+  const mainR = 0.045;  
+  const ribR = 0.025; 
+  const innerR = 0.02; // Thin radius for the inner casing frames  
+  const radialSegs = 8; 
+
+  const yLevels = [-0.45, 0.45];
+  const xPosts = [-2.1, 2.1];
+  const zPosts = [-1.4, 1.4];
+  
+  // Safe signs array for loops
+  const signs = [-1, 1];
+
+  // 1. Internal Solid Housing (The Translucent Body)
+  const mainFrame = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.6, 2.6), mats.chassisSolid);
   chassisGroup.add(mainFrame);
 
-  const mainFrameWire = new THREE.Mesh(new THREE.BoxGeometry(3.24, 0.84, 2.04), mats.chassisWire);
-  chassisGroup.add(mainFrameWire);
+  // 1b. Inner Housing Edge Frames
+  const ix = 2.0;   // Inner half-width
+  const iy = 0.3; // Inner half-height
+  const iz = 1.3;   // Inner half-depth
 
-  // Side skirt panels
-  const skirtGeom = new THREE.BoxGeometry(3.0, 0.50, 0.05);
-  [1.03, -1.03].forEach(z => {
-    const skirt = new THREE.Mesh(skirtGeom, mats.chassisWire);
-    skirt.position.set(0, 0, z);
-    chassisGroup.add(skirt);
+  signs.forEach(x => {
+    signs.forEach(y => {
+      // Z-axis edges
+      const edgeZ = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, 2.6, radialSegs), frameMat);
+      edgeZ.rotation.x = Math.PI / 2;
+      edgeZ.position.set(x * ix, y * iy, 0);
+      chassisGroup.add(edgeZ);
+    });
+    signs.forEach(z => {
+      // Y-axis edges
+      const edgeY = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, 0.6, radialSegs), frameMat);
+      edgeY.position.set(x * ix, 0, z * iz);
+      chassisGroup.add(edgeY);
+    });
+  });
+  signs.forEach(y => {
+    signs.forEach(z => {
+      // X-axis edges
+      const edgeX = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, 4.0, radialSegs), frameMat);
+      edgeX.rotation.z = Math.PI / 2;
+      edgeX.position.set(0, y * iy, z * iz);
+      chassisGroup.add(edgeX);
+    });
   });
 
-  // Internal cross-beams
-  for (let i = 0; i < 5; i++) {
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 2.0), mats.silver);
-    beam.position.set(-1.6 + i * 0.8, 0.43, 0);
-    chassisGroup.add(beam);
-  }
+  // 1c. Diagonal Suspension Struts (Connecting Inner Corners to Outer Corners)
+  const ox = 2.1;  // Outer half-width
+  const oy = 0.45; // Outer half-height
+  const oz = 1.4;  // Outer half-depth
 
-  // Front/rear bumper bars
-  [1.62, -1.62].forEach(x => {
-    const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.60, 2.1), mats.silver);
-    bumper.position.set(x, 0, 0);
-    chassisGroup.add(bumper);
+  signs.forEach(x => {
+    signs.forEach(y => {
+      signs.forEach(z => {
+        // Calculate the two points in 3D space
+        const pInner = new THREE.Vector3(x * ix, y * iy, z * iz);
+        const pOuter = new THREE.Vector3(x * ox, y * oy, z * oz);
+        
+        // Find the distance and direction between them
+        const dist = pInner.distanceTo(pOuter);
+        const dir = new THREE.Vector3().subVectors(pOuter, pInner).normalize();
+        
+        const strut = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, dist, radialSegs), frameMat);
+        
+        // Position exactly in the middle of the two corners
+        strut.position.copy(pInner).lerp(pOuter, 0.5);
+        
+        // Rotate the cylinder to point along our calculated direction vector
+        strut.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        
+        chassisGroup.add(strut);
+      });
+    });
   });
 
-  // Solar panel deck
-  const solar = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.04, 1.6), mats.solar);
-  solar.position.set(0, 0.44, 0);
-  chassisGroup.add(solar);
+  // 2. Tubular Roll-Cage Structure
+  // Longitudinal beams (X-axis) -> requires Z rotation
+  yLevels.forEach(y => {
+    zPosts.forEach(z => {
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(mainR, mainR, 4.2, radialSegs), frameMat);
+      beam.rotation.z = Math.PI / 2;
+      beam.position.set(0, y, z);
+      chassisGroup.add(beam);
+    });
+  });
 
-  const solarW = new THREE.Mesh(new THREE.BoxGeometry(2.52, 0.05, 1.62), mats.solarWire);
-  solarW.position.set(0, 0.44, 0);
-  chassisGroup.add(solarW);
+  // Lateral beams (Z-axis) -> requires X rotation
+  yLevels.forEach(y => {
+    xPosts.forEach(x => {
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(mainR, mainR, 2.8, radialSegs), frameMat);
+      beam.rotation.x = Math.PI / 2;
+      beam.position.set(x, y, 0);
+      chassisGroup.add(beam);
+    });
+  });
 
-  // Solar cell sub-lines
-  for (let i = 0; i < 8; i++) {
-    const sl = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.05, 1.6), new THREE.MeshBasicMaterial({ color: 0x224488, opacity: 0.4, transparent: true }));
-    sl.position.set(-1.2 + i * 0.35, 0.445, 0);
-    chassisGroup.add(sl);
-  }
+  // Vertical corner posts (Y-axis) -> no rotation needed
+  xPosts.forEach(x => {
+    zPosts.forEach(z => {
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(mainR, mainR, 0.90, radialSegs), frameMat);
+      beam.position.set(x, 0, z);
+      chassisGroup.add(beam);
+    });
+  });
 
-  // Chassis status LEDs
+  // 3. Thinner Intermediate Support Ribs
+  const xRibs = [-1.05, 0, 1.05];
+  xRibs.forEach(x => {
+    zPosts.forEach(z => {
+      const rib = new THREE.Mesh(new THREE.CylinderGeometry(ribR, ribR, 0.90, radialSegs), frameMat);
+      rib.position.set(x, 0, z);
+      chassisGroup.add(rib);
+    });
+  });
+
+  // 4. Front/rear bumper crash bars
+  const bumperX = [2.1, -2.1];
+  const bumperY = [-0.2, 0.2];
+  bumperX.forEach(x => {
+    bumperY.forEach(y => {
+      const bumper = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.7, radialSegs), mats.dark);
+      bumper.rotation.x = Math.PI / 2;
+      bumper.position.set(x, y, 0);
+      chassisGroup.add(bumper);
+    });
+  });
+
+  // 5. Custom Trirectangular Brackets (Point Inversion)
+  const L = 0.2; 
+  const vertices = new Float32Array([
+    0, 0, 0,  
+    L, 0, 0,  
+    0, L, 0,  
+    0, 0, L   
+  ]);
+  const indices = [ 0, 2, 1, 0, 3, 2, 0, 1, 3, 1, 2, 3 ];
+  const bracketGeom = new THREE.BufferGeometry();
+  bracketGeom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  bracketGeom.setIndex(indices);
+  bracketGeom.computeVertexNormals(); 
+  
+  yLevels.forEach(y => {
+    xPosts.forEach(x => {
+      zPosts.forEach(z => {
+        const bracket = new THREE.Mesh(bracketGeom, mats.dark);
+        const offsetX = x + Math.sign(x) * mainR;
+        const offsetY = y + Math.sign(y) * mainR;
+        const offsetZ = z + Math.sign(z) * mainR;
+        bracket.position.set(offsetX, offsetY, offsetZ);
+        bracket.scale.set(-Math.sign(x), -Math.sign(y), -Math.sign(z));
+        chassisGroup.add(bracket);
+      });
+    });
+  });
+
+  // 6. Twin Solar Panel Deck (Orthogonal grid and perimeter frames)
+  const panelW = 1.5;
+  const panelD = 2.2;
+  const panelGeom = new THREE.BoxGeometry(panelW, 0.04, panelD);
+  const subLineMat = new THREE.MeshBasicMaterial({ color: 0x224488, opacity: 0.6, transparent: true });
+  const frameR = 0.02;
+
+  const panelPositions = [-1.0, 1.0];
+  panelPositions.forEach(xPos => { 
+    const panelGroup = new THREE.Group();
+    
+    const solar = new THREE.Mesh(panelGeom, mats.solar);
+    panelGroup.add(solar);
+
+    // Longitudinal lines
+    for (let i = 0; i < 5; i++) {
+      const sl = new THREE.Mesh(new THREE.BoxGeometry(0.0, 0.045, panelD), subLineMat);
+      sl.position.set(-0.6 + i * 0.3, 0.005, 0); 
+      panelGroup.add(sl);
+    }
+    
+    // Horizontal lines
+    for (let i = 0; i < 8; i++) {
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(panelW, 0.045, 0.0), subLineMat);
+      hl.position.set(0, 0.005, -1.05 + i * 0.3);
+      panelGroup.add(hl);
+    }
+
+    // Long edges
+    const xEdges = [-panelW / 2, panelW / 2];
+    xEdges.forEach(xEdge => {
+      const edge = new THREE.Mesh(new THREE.CylinderGeometry(frameR, frameR, panelD, 8), frameMat);
+      edge.rotation.x = Math.PI / 2;
+      edge.position.set(xEdge, 0.0, 0); 
+      panelGroup.add(edge);
+    });
+
+    // Short edges
+    const zEdges = [-panelD / 2, panelD / 2];
+    zEdges.forEach(zEdge => {
+      const edge = new THREE.Mesh(new THREE.CylinderGeometry(frameR, frameR, panelW, 8), frameMat);
+      edge.rotation.z = Math.PI / 2;
+      edge.position.set(0, 0.0, zEdge);
+      panelGroup.add(edge);
+    });
+
+    panelGroup.position.set(xPos, 0.53, 0);
+    chassisGroup.add(panelGroup);
+  });
+
+  // 7. Chassis status LEDs
   const cLedMat = () => new THREE.MeshStandardMaterial({ color: 0x331500, emissive: 0x000000, emissiveIntensity: 0 });
   const chassisLeds = [
-    [1.55, 0.46, 0.7],
-    [1.55, 0.46, -0.7],
-    [-1.55, 0.46, 0.0],
-    [0.0, 0.46, -1.0],
+    [2.1, 0.57, 1.4],
+    [2.1, 0.57, -1.4],
+    [-2.1, 0.57, 1.4],
+    [-2.1, 0.57, -1.4],
   ].map(([x, y, z]) => {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), cLedMat());
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), cLedMat());
     mesh.position.set(x, y, z);
     chassisGroup.add(mesh);
     return mesh;
   });
   groups.chassisLeds = chassisLeds;
 
-  chassisGroup.position.set(0, 8.0, 0); // starts above — animates into place
-  chassisGroup.scale.setScalar(0.3);
+  chassisGroup.position.set(0, 8.0, 0); 
+  chassisGroup.scale.setScalar(0.3); 
+  
   roverGroup.add(chassisGroup);
   groups.chassis = chassisGroup;
 

@@ -95,68 +95,78 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
-        groups.pcb.position.y = L(-6.0, 0.08, p);
+        
+        // Lowered final Y from 0.12 to -0.10 to center it inside the translucent body
+        groups.pcb.position.y = L(-6.0, -0.10, p); 
         groups.pcb.rotation.y = L(0.6, 0, p);
+
+        // Lowered final Y from 0.32 to 0.10 to maintain the exact 0.20 unit gap with the PCB
         groups.mpu.position.y = p < 0.6
           ? L(0, 0.55, p / 0.6)
-          : L(0.55, 0.32, (p - 0.6) / 0.4);
+          : L(0.55, 0.10, (p - 0.6) / 0.4);
           
         camera.position.set(L(4, 3, p), L(3, 3.5, p), L(7, 7.5, p));
       },
     });
 
-    // Phase 3 : Sensor mast extrudes downward from above
+    // Phase 2 → 3 : Chassis materialises
     ScrollTrigger.create({
       trigger: sectionRefs.current[2],
       scroller,
       start: 'top 90%',
-      end: 'bottom 10%',
-      scrub: 1.2,
-      onUpdate(self) {
-        const p = self.progress;
-        groups.sensors.position.set(L(2.5, 0, p), L(9.0, 0.85, p), 0.3);
-        groups.sensors.rotation.y = L(Math.PI * 0.5, 0, p);
-        camera.position.set(L(3, 1.5, p), L(3.5, 5.5, p), L(7.5, 8.5, p));
-      },
-    });
-
-    // Phase 4 : Chassis materialises
-    ScrollTrigger.create({
-      trigger: sectionRefs.current[3],
-      scroller,
-      start: 'top 90%',
-      end: 'bottom 10%',
+      end: 'center center',
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
         groups.chassis.position.y = L(9.0, 0, p);
         groups.chassis.scale.setScalar(L(0.25, 1.0, p));
         groups.chassis.rotation.y = L(-Math.PI * 0.35, 0, p);
-        camera.position.set(L(1.5, 5.5, p), L(5.5, 4.0, p), L(8.5, 9.5, p));
+        
+        // Camera blends from PCB end (3, 3.5, 7.5) to Chassis end (5.5, 4.0, 9.5)
+        camera.position.set(L(3, 5.5, p), L(3.5, 4.0, p), L(7.5, 9.5, p));
       },
     });
 
-    // Phase 5 : Wheels bolt in from side
+    // Phase 3 → 4 : Sensor mast extrudes downward
+    ScrollTrigger.create({
+      trigger: sectionRefs.current[3],
+      scroller,
+      start: 'top 90%',
+      end: 'center center',
+      scrub: 1.2,
+      onUpdate(self) {
+        const p = self.progress;
+        groups.sensors.position.set(L(2.5, 0, p), L(9.0, 0.85, p), 0.3);
+        groups.sensors.rotation.y = L(Math.PI * 0.5, 0, p);
+        
+        // Camera smoothly arcs up from Chassis (5.5, 4.0, 9.5) to view the Mast (2.5, 5.5, 8.5)
+        camera.position.set(L(5.5, 2.5, p), L(4.0, 5.5, p), L(9.5, 8.5, p));
+      },
+    });
+
+    // Phase 4 → 5 : Wheels bolt in
     ScrollTrigger.create({
       trigger: sectionRefs.current[4],
       scroller,
       start: 'top 90%',
-      end: 'bottom 10%',
+      end: 'center center',
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
         groups.wheels.position.set(L(5.0, 0, p), L(9.0, 0, p), 0);
         groups.wheels.rotation.z = L(Math.PI * 0.25, 0, p);
-        camera.position.set(L(5.5, 6.5, p), L(4.0, 2.8, p), L(9.5, 7.5, p));
+        
+        // Camera drops down from Mast (2.5, 5.5, 8.5) to view the Wheels (6.5, 2.8, 7.5)
+        camera.position.set(L(2.5, 6.5, p), L(5.5, 2.8, p), L(8.5, 7.5, p));
       },
     });
 
-    // Phase 6 : Activation — LEDs light up
+    // Phase 5 → 6 : Activation — LEDs light up
     ScrollTrigger.create({
       trigger: sectionRefs.current[5],
       scroller,
       start: 'top 90%',
-      end: 'bottom 10%',
+      end: 'center center',
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
