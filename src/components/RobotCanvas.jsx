@@ -249,7 +249,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       if (groups.wheelMeshes) {
         groups.wheelMeshes.forEach((wheel) => {
           // Uniformly rotate around the X-axis so all 6 wheels roll forward
-          wheel.rotation.x -= dt * (activated ? 2.8 : 0);
+          wheel.rotation.x += dt * (activated ? 2.8 : 0);
         });
       }
 
