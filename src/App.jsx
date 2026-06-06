@@ -22,7 +22,7 @@ export default function App() {
 
   return (
     <>
-      {/* Global font imports */}
+      {/* Global font imports & CSS */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@200;300;400;600;700;900&display=swap');
 
@@ -32,10 +32,9 @@ export default function App() {
           background: #07080a;
           color: #d0d8e8;
           font-family: 'Rajdhani', sans-serif;
-          overflow: hidden;        /* outer body never scrolls */
+          overflow: hidden;
         }
 
-        /* Custom scrollbar for the left pane */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,122,0,0.25); border-radius: 2px; }
@@ -46,33 +45,65 @@ export default function App() {
           50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(0,255,136,0); }
         }
 
+        /* --- BASE DESKTOP LAYOUT (No more inline styles!) --- */
+        .app-wrapper {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .left-pane {
+          width: 60%;
+          height: 100vh;
+          overflow-y: scroll;
+          background: linear-gradient(180deg, #07080a 0%, #0d0f12 100%);
+          border-right: 1px solid rgba(255,122,0,0.12);
+          position: relative;
+          z-index: 10;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,122,0,0.3) transparent;
+        }
+
+        .right-pane {
+          width: 40%;
+          height: 100vh;
+          position: relative;
+          flex-shrink: 0;
+          background: #07080a;
+        }
+
+        /* --- MOBILE LAYOUT OVERRIDES --- */
         @media (max-width: 768px) {
-          body { overflow: auto; }
+          .app-wrapper {
+            flex-direction: column-reverse;
+          }
+          .left-pane {
+            width: 100%;
+            height: 70vh;
+            border-right: none;
+            border-top: 1px solid rgba(255,122,0,0.2);
+          }
+          .right-pane {
+            width: 100%;
+            height: 30vh;
+          }
         }
       `}</style>
 
-      {/* Desktop layout */}
-      <div style={{
-        display: 'flex',
-        width: '100%',
-        height: '100vh',
-        overflow: 'hidden',
-      }}>
-        {/* ── LEFT PANE — scrollable text ── */}
+      {/* Main Layout Container */}
+      <div className="app-wrapper">
+        
+        {/* ── LEFT PANE ── */}
         <ContentOverlay
           ref={scrollerRef}
           activePhase={activePhase}
           sectionRefs={sectionRefs}
         />
 
-        {/* ── RIGHT PANE — fixed 3D canvas ── */}
-        <div style={{
-          width: '60%',
-          height: '100vh',
-          position: 'relative',
-          flexShrink: 0,
-          background: '#07080a',
-        }}>
+        {/* ── RIGHT PANE ── */}
+        <div className="right-pane">
           {/* Scroll progress bar */}
           <div style={{
             position: 'absolute',

@@ -40,7 +40,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
     scene.fog = new THREE.FogExp2(0x07080a, 0.018);
 
     // ── Camera ─────────────────────────────────────────────────────
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
     camera.position.set(4.0, 3.0, 7.0);
     camera.lookAt(0, 0.5, 0);
 
@@ -96,7 +96,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       onUpdate(self) {
         const p = self.progress;
         
-        groups.pcb.position.y = L(-6.0, -0.10, p); 
+        groups.pcb.position.y = L(-9.0, -0.10, p); 
         // Changed target from 0 to Math.PI / 2 (90 degrees)
         groups.pcb.rotation.y = L(0.6, Math.PI / 2, p);
 
@@ -156,7 +156,7 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
-        groups.wheels.position.set(0, L(-9.0, 0, p), 0);
+        groups.wheels.position.set(0, L(-15.0, 0, p), 0);
         groups.wheels.rotation.z = L(0, 0, p);
         
         // Camera drops down from Mast (2.5, 5.5, 8.5) to view the Wheels (6.5, 2.8, 7.5)

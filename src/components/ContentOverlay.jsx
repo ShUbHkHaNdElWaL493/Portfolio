@@ -151,20 +151,7 @@ function ContactLinks({ links }) {
  */
 const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, sectionRefs }, ref) {
   return (
-    <div
-      ref={ref}
-      style={{
-        width: '40%',
-        height: '100vh',
-        overflowY: 'scroll',
-        background: 'linear-gradient(180deg, #07080a 0%, #0d0f12 100%)',
-        borderRight: '1px solid rgba(255,122,0,0.12)',
-        position: 'relative',
-        zIndex: 10,
-        scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(255,122,0,0.3) transparent',
-      }}
-    >
+    <div className="left-pane" ref={ref}>
       {/* Sticky header */}
       <div style={{
         position: 'sticky',
