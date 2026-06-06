@@ -9,7 +9,6 @@ export const phases = [
     title: 'Shubh Khandelwal',
     content: `Specialized in autonomous navigation systems and embedded software for planetary exploration platforms. Currently contributing to next-generation Mars surface mobility architecture at JPL Research Division.`,
     content2: `Bridging the gap between simulation fidelity and physical deployment — crafting systems that work in both Gazebo virtual environments and the unforgiving terrain of real-world field tests.`,
-    tags: ['ROS2', 'C++17', 'Python', 'Gazebo', 'RViz', 'SLAM'],
     state: 'MPU Initialization',
   },
   {

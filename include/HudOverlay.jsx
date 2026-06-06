@@ -62,24 +62,17 @@ export default function HudOverlay({ activePhase, scrollPct }) {
         STATE: {phases[activePhase]?.state}
       </div>
 
-      {/* Top-right readout */}
-      <div style={{ position: 'absolute', top: 18, right: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em', textAlign: 'right' }}>
+      {/* Bottom-left readout */}
+      <div style={{ position: 'absolute', bottom: 18, left: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em' }}>
         {utcTime}<br />
         CAM: PERSPECTIVE 45°<br />
         FOCAL: 0.1 – 200m
-      </div>
-
-      {/* Bottom-left readout */}
-      <div style={{ position: 'absolute', bottom: 18, left: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em' }}>
-        AMBIENT: 1.6 // KEY: 2.2<br />
-        FOG: EXP2 0.018
       </div>
 
       {/* Bottom-right readout */}
       <div style={{ position: 'absolute', bottom: 18, right: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em', textAlign: 'right' }}>
         SCROLL: {Math.round(scrollPct).toString().padStart(3, ' ')}%<br />
         GRID: 18×18 / 36 DIV<br />
-        AXIS HELPER: XYZ<br />
         WIREFRAME: PARTIAL
       </div>
 
