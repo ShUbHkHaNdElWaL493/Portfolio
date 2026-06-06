@@ -5,12 +5,13 @@
 
 ## Quick Start
 
+Build for development testing using `vite`:
 ```bash
 npm install
 npm run dev
 ```
 
-Build for production:
+Build for production using `gh-pages`:
 ```bash
 npm run deploy
 ```
