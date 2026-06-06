@@ -161,25 +161,6 @@ const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, section
         background: '#07080a',
         zIndex: 100,
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          fontFamily: "'Share Tech Mono', monospace",
-          fontSize: 10,
-          color: '#FF7A00',
-          marginBottom: 12,
-          letterSpacing: '0.15em',
-        }}>
-          <span style={{
-            width: 6, height: 6,
-            borderRadius: '50%',
-            background: '#00FF88',
-            display: 'inline-block',
-            animation: 'hud-pulse 2s infinite',
-          }} />
-          ROVER_ID: ARES-IV // STATUS: NOMINAL
-        </div>
         <h1 style={{
           fontFamily: "'Exo 2', sans-serif",
           fontSize: '2.1rem',
@@ -189,19 +170,19 @@ const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, section
           color: '#fff',
           margin: 0,
         }}>
-          Alex Rivera
+          Shubh Khandelwal
           <span style={{ color: '#FF7A00', display: 'block' }}>
-            Robotics S/W Engineer
+            Robotics Software Engineer
           </span>
         </h1>
         <div style={{
           fontFamily: "'Share Tech Mono', monospace",
-          fontSize: 10,
+          fontSize: 12,
           color: '#8a95a8',
           marginTop: 8,
           letterSpacing: '0.08em',
         }}>
-          ∷ ROS2 · SLAM · AUTONOMOUS SYSTEMS · EMBEDDED AI
+          ∷ ROS2 · AGV · AUTONOMOUS SYSTEMS · MOTION PLANNING · MANIPULATORS · AGV · UGV · IIITDM KANCHEEPURAM
         </div>
       </div>
 
@@ -282,11 +263,11 @@ const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, section
         padding: '2rem 2.5rem',
         borderTop: '1px solid rgba(255,122,0,0.1)',
         fontFamily: "'Share Tech Mono', monospace",
-        fontSize: 9,
-        color: '#2a3040',
+        fontSize: 12,
+        color: '#8a95a8',
         letterSpacing: '0.08em',
       }}>
-        ARES-IV PORTFOLIO SYSTEM v2.4.1 // ALL SYSTEMS NOMINAL
+        Shubh Khandelwal's Interactive 3-D portfolio.
       </div>
     </div>
   );
