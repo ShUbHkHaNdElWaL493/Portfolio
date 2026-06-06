@@ -232,10 +232,15 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       const activated = groups.chassisLeds?.[0]?.material?.emissiveIntensity > 0.5;
 
       // LiDAR scan plane rotates ONLY when activated
-      if (activated && groups.sensors) {
+      if (groups.sensors) {
         groups.sensors.children.forEach(child => {
           if (child.geometry?.type === 'CircleGeometry') {
-            child.rotation.z += dt * 2 * Math.PI;
+            // Hide the plane completely until the lights turn on
+            child.visible = activated;
+            
+            if (activated) {
+              child.rotation.z += dt * 1.4;
+            }
           }
         });
       }

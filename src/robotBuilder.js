@@ -899,10 +899,6 @@ export function buildRobot(scene) {
   roverGroup.add(gridHelper);
   groups.grid = gridHelper;
 
-  const axisHelper = new THREE.AxesHelper(1.8);
-  axisHelper.position.set(-6.5, -0.9, -5.5);
-  roverGroup.add(axisHelper);
-
   // Origin cross-hair (floor)
   const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.005, 0.02), new THREE.MeshBasicMaterial({ color: 0xFF7A00, opacity: 0.4, transparent: true }));
   crossH.position.y = -0.94;
