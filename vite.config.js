@@ -5,6 +5,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/Portfolio/',
   // Vite can tree-shake Three.js quite well with this hint
   optimizeDeps: {
     include: ['three', 'gsap'],
