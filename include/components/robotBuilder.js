@@ -323,7 +323,7 @@ export function buildRobot(scene) {
     pcbGroup.add(hole);
   });
 
-  pcbGroup.position.set(0, -6.0, 0); // starts below — animated in
+  pcbGroup.position.set(0, -9.0, 0); // starts below — animated in
   
   // Attach to master group
   roverGroup.add(pcbGroup); 
@@ -672,7 +672,7 @@ export function buildRobot(scene) {
 
   chassisGroup.add(mountGroup);
 
-  chassisGroup.position.set(0, 8.0, 0); 
+  chassisGroup.position.set(0, 9.0, 0); 
   chassisGroup.scale.setScalar(0.3); 
   
   roverGroup.add(chassisGroup);
@@ -745,7 +745,7 @@ export function buildRobot(scene) {
   scanPlane.renderOrder = 1;
   sensorGroup.add(scanPlane);
 
-  sensorGroup.position.set(0, 8.0, 0.3); // starts above — animates down
+  sensorGroup.position.set(2.5, 9.0, 0.0); // starts above — animates down
   roverGroup.add(sensorGroup);
   groups.sensors = sensorGroup;
 
@@ -885,7 +885,7 @@ export function buildRobot(scene) {
   wheelsGroup.add(buildSideSuspension(-1));
   wheelsGroup.add(buildSideSuspension(1));
 
-  wheelsGroup.position.set(0, 8.0, 0); // starts above — bolts in on scroll
+  wheelsGroup.position.set(0, -15.0, 0); // starts below — bolts in on scroll
   roverGroup.add(wheelsGroup);
   groups.wheels = wheelsGroup;
 

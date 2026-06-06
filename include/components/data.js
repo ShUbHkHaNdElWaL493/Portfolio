@@ -11,7 +11,7 @@ export const phases = [
     content: `Specialized in autonomous navigation systems and embedded software for planetary exploration platforms. Currently contributing to next-generation Mars surface mobility architecture at JPL Research Division.`,
     content2: `Bridging the gap between simulation fidelity and physical deployment — crafting systems that work in both Gazebo virtual environments and the unforgiving terrain of real-world field tests.`,
     tags: ['ROS2', 'C++17', 'Python', 'Gazebo', 'RViz', 'SLAM'],
-    component: 'MPU',
+    state: 'MPU Initialization',
   },
   {
     id: 'education',
@@ -26,7 +26,7 @@ export const phases = [
       { title: 'M.S. Robotics Engineering — CMU', date: '2019 – 2021' },
       { title: 'B.S. ECE — UC San Diego', date: '2015 – 2019' },
     ],
-    component: 'PCB',
+    state: 'PCB Connection',
   },
   {
     id: 'experience',
@@ -42,7 +42,7 @@ export const phases = [
       { title: 'Robotics Engineer — Boston Dynamics', date: '2021 – 2022' },
       { title: 'Research Assistant — CMU RI', date: '2019 – 2021' },
     ],
-    component: 'SENSORS',
+    state: 'Chassis Placement',
   },
   {
     id: 'projects',
@@ -59,7 +59,7 @@ export const phases = [
       { value: '43%', label: 'LATENCY REDUCTION' },
       { value: '7', label: 'UNIVERSITY ADOPTIONS' },
     ],
-    component: 'CHASSIS',
+    state: 'Sensor Addition',
   },
   {
     id: 'achievements',
@@ -76,7 +76,7 @@ export const phases = [
       { value: '3', label: 'PATENTS FILED' },
       { value: 'TOP 3%', label: 'GLOBAL RANKING' },
     ],
-    component: 'WHEELS',
+    state: 'Suspension Attachment',
   },
   {
     id: 'contact',
@@ -92,6 +92,6 @@ export const phases = [
       { icon: '◈', label: 'linkedin.com/in/alexrivera-eng', type: 'linkedin', href: 'https://linkedin.com' },
       { icon: '◉', label: '+1 (415) 867-5309', type: 'phone', href: 'tel:+14158675309' },
     ],
-    component: 'ACTIVATED',
+    state: 'Rover Activation',
   },
 ];

@@ -11,6 +11,24 @@ import ContentOverlay from '@/include/ContentOverlay';
 import RobotCanvas from '@/include/RobotCanvas';
 import HudOverlay from '@/include/HudOverlay';
 
+// Share Tech Mono (only has a 400 weight)
+import '@fontsource/share-tech-mono';
+
+// Rajdhani weights: 300, 400, 500, 600, 700
+import '@fontsource/rajdhani/300.css';
+import '@fontsource/rajdhani/400.css';
+import '@fontsource/rajdhani/500.css';
+import '@fontsource/rajdhani/600.css';
+import '@fontsource/rajdhani/700.css';
+
+// Exo 2 weights: 200, 300, 400, 600, 700, 900
+import '@fontsource/exo-2/200.css';
+import '@fontsource/exo-2/300.css';
+import '@fontsource/exo-2/400.css';
+import '@fontsource/exo-2/600.css';
+import '@fontsource/exo-2/700.css';
+import '@fontsource/exo-2/900.css';
+
 export default function App() {
   const scrollerRef = useRef(null);
   const sectionRefs = useRef([]);
