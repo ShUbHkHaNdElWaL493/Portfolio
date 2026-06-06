@@ -182,7 +182,7 @@ const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, section
           marginTop: 8,
           letterSpacing: '0.08em',
         }}>
-          ∷ ROS2 · AGV · AUTONOMOUS SYSTEMS · MOTION PLANNING · MANIPULATORS · AGV · UGV · IIITDM KANCHEEPURAM
+          ∷ ROS2 · MOTION PLANNING · MANIPULATORS · AGV · UGV · IIITDM KANCHEEPURAM
         </div>
       </div>
 
