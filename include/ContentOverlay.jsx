@@ -224,16 +224,6 @@ const ContentOverlay = forwardRef(function ContentOverlay({ activePhase, section
             {ph.title}
           </h2>
 
-          <p style={{
-            fontFamily: "'Share Tech Mono', monospace",
-            fontSize: 12,
-            color: '#FF7A00',
-            marginBottom: '1rem',
-            letterSpacing: '0.06em',
-          }}>
-            {ph.subtitle}
-          </p>
-
           <p style={{ fontSize: 15, lineHeight: 1.8, color: '#8a95a8', marginBottom: '0.8rem', fontWeight: 400 }}>
             {ph.content}
           </p>
