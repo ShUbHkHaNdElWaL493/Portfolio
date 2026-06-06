@@ -453,6 +453,28 @@ export function buildRobot(scene) {
     });
   });
 
+  // 3b. Diagonal Cross-Bracing (Connecting 1st and 3rd ribs)
+  zPosts.forEach(z => {
+    // Create an 'X' brace on both the front and back Z-planes
+    signs.forEach(sign => {
+      // Point A: Bottom of 1st rib (or top, alternating based on 'sign')
+      const pA = new THREE.Vector3(-1.05, -0.45 * sign, z);
+      // Point B: Top of 3rd rib (or bottom)
+      const pB = new THREE.Vector3(1.05, 0.45 * sign, z);
+
+      const dist = pA.distanceTo(pB);
+      const dir = new THREE.Vector3().subVectors(pB, pA).normalize();
+
+      const brace = new THREE.Mesh(new THREE.CylinderGeometry(ribR, ribR, dist, radialSegs), frameMat);
+      // Position at the exact midpoint
+      brace.position.copy(pA).lerp(pB, 0.5);
+      // Rotate to point exactly along the directional vector
+      brace.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      
+      chassisGroup.add(brace);
+    });
+  });
+
   // 4. Front/rear bumper crash bars
   const bumperX = [2.1, -2.1];
   const bumperY = [-0.2, 0.2];
@@ -491,6 +513,25 @@ export function buildRobot(scene) {
         chassisGroup.add(bracket);
       });
     });
+  });
+
+  // 5b. Suspension Mounting Hubs (Side faces at Z=0)
+  zPosts.forEach(z => {
+    const hubGroup = new THREE.Group();
+    
+    // Central Bearing Housing (Flat circular piece)
+    const bearing = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.08, 16), mats.silver);
+    bearing.rotation.x = Math.PI / 2;
+    hubGroup.add(bearing);
+
+    // Inner bearing race (Dark recess for the suspension pin)
+    const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.09, 16), mats.dark);
+    hole.rotation.x = Math.PI / 2;
+    hubGroup.add(hole);
+
+    // Position the entire hub exactly where the suspension pivot connects (X = 2.1)
+    hubGroup.position.set(0, 0, z);
+    chassisGroup.add(hubGroup);
   });
 
   // 6. Twin Solar Panel Deck (Orthogonal grid and perimeter frames)
@@ -710,87 +751,139 @@ export function buildRobot(scene) {
 
   // ════════════════════════════════════════════════════════════════
   // PHASE 5 — WHEELS + ROCKER-BOGIE SUSPENSION
-  // 6 wheels, angled suspension arms, treaded tires
+  // True rocker-bogie kinematics, chassis center pivot, offset wheels
   // ════════════════════════════════════════════════════════════════
   const wheelsGroup = new THREE.Group();
   wheelsGroup.name = 'wheels';
-
-  const wheelConfig = [
-    // front wheels
-    { x: -1.5, z:  1.1, ry: 0,    armAngle:  0.18 },
-    { x:  1.5, z:  1.1, ry: 0,    armAngle: -0.18 },
-    // mid wheels
-    { x: -1.7, z:  0,   ry: 0,    armAngle:  0.08 },
-    { x:  1.7, z:  0,   ry: 0,    armAngle: -0.08 },
-    // rear wheels
-    { x: -1.5, z: -1.1, ry: 0,    armAngle:  0.18 },
-    { x:  1.5, z: -1.1, ry: 0,    armAngle: -0.18 },
-  ];
-
   groups.wheelMeshes = [];
 
-  wheelConfig.forEach(cfg => {
-    const armGroup = new THREE.Group();
+  // Helper: Create a cylindrical suspension tube between two 3D points
+  const createTube = (p1, p2, radius, mat) => {
+    const dist = p1.distanceTo(p2);
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, dist, 8), mat);
+    tube.position.copy(p1).lerp(p2, 0.5);
+    tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
+    return tube;
+  };
 
-    // Upper suspension link
-    const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.55, 0.08), mats.silver);
-    upperArm.rotation.z = cfg.armAngle;
-    upperArm.position.set(0, -0.20, 0);
-    armGroup.add(upperArm);
-
-    // Lower rocker
-    const lowerArm = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.30, 0.06), mats.silver);
-    lowerArm.rotation.z = cfg.armAngle * 0.5;
-    lowerArm.position.set(cfg.armAngle > 0 ? 0.04 : -0.04, -0.55, 0);
-    armGroup.add(lowerArm);
-
-    // Pivot joint sphere
-    const pivot = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 10), mats.dark);
-    pivot.position.set(0, 0, 0);
-    armGroup.add(pivot);
-
-    // Wheel assembly
+  // Helper: Build a single wheel assembly aligned to X-axis
+  const buildWheel = () => {
     const wheelGroup = new THREE.Group();
-
-    // Tire body
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.24, 18), mats.dark);
-    tire.rotation.x = Math.PI / 2;
+    tire.rotation.z = Math.PI / 2;
     wheelGroup.add(tire);
 
-    // Tread cleats (12 around circumference)
     for (let t = 0; t < 14; t++) {
       const angle = (t / 14) * Math.PI * 2;
-      const tread = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.26, 0.07), mats.orange);
-      tread.position.set(Math.cos(angle) * 0.34, 0, Math.sin(angle) * 0.34);
+      const tread = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.05, 0.07), mats.orange);
+      tread.position.set(0, Math.cos(angle) * 0.34, Math.sin(angle) * 0.34);
       tread.lookAt(0, 0, 0);
       wheelGroup.add(tread);
     }
 
-    // Tire sidewall rings
-    [-0.12, 0.12].forEach(yOff => {
+    [-0.12, 0.12].forEach(xOff => {
       const sidewall = new THREE.Mesh(new THREE.TorusGeometry(0.30, 0.03, 6, 18), mats.silver);
-      sidewall.rotation.x = Math.PI / 2;
-      sidewall.position.set(0, yOff, 0);
+      sidewall.rotation.y = Math.PI / 2;
+      sidewall.position.set(xOff, 0, 0);
       wheelGroup.add(sidewall);
     });
 
-    // Hub
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.26, 8), mats.silver);
-    hub.rotation.x = Math.PI / 2;
+    hub.rotation.z = Math.PI / 2;
     wheelGroup.add(hub);
 
-    // Hub center bolt
     const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.28, 6), new THREE.MeshBasicMaterial({ color: 0xFF7A00 }));
-    bolt.rotation.x = Math.PI / 2;
+    bolt.rotation.z = Math.PI / 2;
     wheelGroup.add(bolt);
 
-    wheelGroup.position.set(0, -0.6, 0);
-    armGroup.add(wheelGroup);
+    return wheelGroup;
+  };
 
-    armGroup.position.set(cfg.x, 0.0, cfg.z);
-    wheelsGroup.add(armGroup);
-    groups.wheelMeshes.push(wheelGroup);
-  });
+  // Helper: Build Left/Right Rocker-Bogie Suspension
+  const buildSideSuspension = (xSign) => {
+    const sideGroup = new THREE.Group();
+    
+    // The outer face of the chassis is at X = 2.1
+    // We mount the main pivot slightly outside it at X = 2.3
+    const pivotX = 1.77 * xSign;
+    
+    // Local coordinate nodes for the suspension joints (all in the local X=0 plane)
+    // Z-coordinates inverted to rotate the entire suspension layout 180 degrees
+    const pMainPivot = new THREE.Vector3(0, 0, 0);
+    const pFrontAxle = new THREE.Vector3(0, -0.6, -1.1);  // Moved to back
+    const pBogiePivot = new THREE.Vector3(0, -0.2, 0.55); // Moved to front
+    const pMidAxle = new THREE.Vector3(0, -0.6, 0);       // Stays centered
+    const pRearAxle = new THREE.Vector3(0, -0.6, 1.1);    // Moved to front
+
+    const tubeR = 0.05; // Suspension strut thickness
+    const wX = 0.25 * xSign; // Offset of wheels outward from the suspension arms
+
+    // --- ROCKER ARM ---
+    const rockerGroup = new THREE.Group();
+    
+    // Main linkage strut forward to front axle
+    rockerGroup.add(createTube(pMainPivot, pFrontAxle, tubeR, mats.silver));
+    // Main linkage strut backward to bogie pivot
+    rockerGroup.add(createTube(pMainPivot, pBogiePivot, tubeR, mats.silver));
+    
+    // Main Chassis Connection Pivot (Horizontal tube driven into the chassis)
+    const mainJoint = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.36, 12), mats.dark);
+    mainJoint.rotation.z = Math.PI / 2;
+    mainJoint.position.set(-0.1 * xSign, 0, 0); // Bridges inward to the chassis frame
+    rockerGroup.add(mainJoint);
+
+    // Front Wheel & Axle pin
+    const frontWheel = buildWheel();
+    frontWheel.position.set(wX, pFrontAxle.y, pFrontAxle.z);
+    rockerGroup.add(frontWheel);
+    groups.wheelMeshes.push(frontWheel);
+    rockerGroup.add(createTube(pFrontAxle.add(new THREE.Vector3(-xSign * 0.08, 0, 0)), frontWheel.position, 0.04, mats.dark));
+
+    // --- BOGIE ARM ---
+    const bogieGroup = new THREE.Group();
+    bogieGroup.position.copy(pBogiePivot); // Bogie pivot sits at the end of the rocker
+
+    // Relative coordinates for the bogie linkages
+    const pMidRel = pMidAxle.clone().sub(pBogiePivot);
+    const pRearRel = pRearAxle.clone().sub(pBogiePivot);
+
+    // Bogie struts dropping down to mid and rear axles
+    bogieGroup.add(createTube(new THREE.Vector3(0, 0, 0), pMidRel, tubeR, mats.silver));
+    bogieGroup.add(createTube(new THREE.Vector3(0, 0, 0), pRearRel, tubeR, mats.silver));
+
+    // Bogie Pivot Joint Hub
+    const bogieJoint = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.16, 12), mats.dark);
+    bogieJoint.rotation.z = Math.PI / 2;
+    bogieGroup.add(bogieJoint);
+
+    // Mid Wheel & Axle pin
+    const midWheel = buildWheel();
+    midWheel.position.set(wX, pMidRel.y, pMidRel.z);
+    bogieGroup.add(midWheel);
+    groups.wheelMeshes.push(midWheel);
+    bogieGroup.add(createTube(pMidRel.add(new THREE.Vector3(-xSign * 0.08, 0, 0)), midWheel.position, 0.04, mats.dark));
+
+    // Rear Wheel & Axle pin
+    const rearWheel = buildWheel();
+    rearWheel.position.set(wX, pRearRel.y, pRearRel.z);
+    bogieGroup.add(rearWheel);
+    groups.wheelMeshes.push(rearWheel);
+    bogieGroup.add(createTube(pRearRel.add(new THREE.Vector3(-xSign * 0.08, 0, 0)), rearWheel.position, 0.04, mats.dark));
+
+    // Assemble the full linkage
+    rockerGroup.add(bogieGroup);
+    sideGroup.add(rockerGroup);
+    
+    // Move the entire side assembly to its chassis mount point
+    sideGroup.position.set(pivotX, 0, 0);
+    sideGroup.scale.setScalar(1.2);
+
+    return sideGroup;
+  };
+
+  // Attach Left (-1) and Right (1) suspension assemblies
+  wheelsGroup.add(buildSideSuspension(-1));
+  wheelsGroup.add(buildSideSuspension(1));
 
   wheelsGroup.position.set(0, 8.0, 0); // starts above — bolts in on scroll
   roverGroup.add(wheelsGroup);

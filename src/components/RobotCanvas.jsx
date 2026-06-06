@@ -156,8 +156,8 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
       scrub: 1.2,
       onUpdate(self) {
         const p = self.progress;
-        groups.wheels.position.set(L(5.0, 0, p), L(9.0, 0, p), 0);
-        groups.wheels.rotation.z = L(Math.PI * 0.25, 0, p);
+        groups.wheels.position.set(0, L(-9.0, 0, p), 0);
+        groups.wheels.rotation.z = L(0, 0, p);
         
         // Camera drops down from Mast (2.5, 5.5, 8.5) to view the Wheels (6.5, 2.8, 7.5)
         camera.position.set(L(2.5, 6.5, p), L(5.5, 2.8, p), L(8.5, 7.5, p));
@@ -240,10 +240,11 @@ export default function RobotCanvas({ scrollerRef, sectionRefs, onPhaseChange, o
         });
       }
 
-      // Wheel spin (slow idle always, faster on activation)
+      // Wheel spin (idle always, faster on activation)
       if (groups.wheelMeshes) {
-        groups.wheelMeshes.forEach((wheel, i) => {
-          wheel.rotation.z += dt * (activated ? 2.8 : 0.4) * (i % 2 === 0 ? 1 : -1);
+        groups.wheelMeshes.forEach((wheel) => {
+          // Uniformly rotate around the X-axis so all 6 wheels roll forward
+          wheel.rotation.x -= dt * (activated ? 2.8 : 0);
         });
       }
 
