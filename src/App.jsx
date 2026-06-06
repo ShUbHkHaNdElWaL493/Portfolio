@@ -3,13 +3,13 @@
 // wires ContentOverlay ↔ RobotCanvas ↔ HudOverlay.
 //
 // Layout:
-//   Desktop (>768px): flex-row — ContentOverlay 40% | right pane 60% (sticky)
+//   Desktop (>768px): flex-row — ContentOverlay 60% | right pane 40% (sticky)
 //   Mobile  (≤768px): flex-col — right pane 60vh sticky top | ContentOverlay scrollable below
 
 import { useRef, useState, useCallback } from 'react';
-import ContentOverlay from '../include/ContentOverlay';
-import RobotCanvas from '../include/RobotCanvas';
-import HudOverlay from '../include/HudOverlay';
+import ContentOverlay from '@/include/ContentOverlay';
+import RobotCanvas from '@/include/RobotCanvas';
+import HudOverlay from '@/include/HudOverlay';
 
 export default function App() {
   const scrollerRef = useRef(null);
