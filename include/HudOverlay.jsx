@@ -123,12 +123,12 @@ export default function HudOverlay({ activePhase, scrollPct }) {
       </div>
 
       {/* Scan line overlay (CSS) */}
-      {/* <div style={{
+      <div style={{
         position: 'absolute',
         inset: 0,
         background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px)',
         pointerEvents: 'none',
-      }} /> */}
+      }} />
     </div>
   );
 }
