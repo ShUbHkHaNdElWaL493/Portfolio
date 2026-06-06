@@ -3,7 +3,7 @@
 // The scroll position of this pane drives the GSAP ScrollTriggers in RobotCanvas.
 
 import { forwardRef } from 'react';
-import { phases } from '../data';
+import { phases } from './components/data';
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 

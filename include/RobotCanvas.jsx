@@ -6,8 +6,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { buildRobot } from '../robotBuilder';
-import { phases } from '../data';
+import { buildRobot } from './components/robotBuilder';
+import { phases } from './components/data';
 
 gsap.registerPlugin(ScrollTrigger);
 

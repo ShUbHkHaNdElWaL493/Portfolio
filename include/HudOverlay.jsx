@@ -3,7 +3,7 @@
 // Mimics an RViz / Mission Control overlay with real-time telemetry readouts.
 
 import { useEffect, useState } from 'react';
-import { phases } from '../data';
+import { phases } from './components/data';
 
 export default function HudOverlay({ activePhase, scrollPct }) {
   const [utcTime, setUtcTime] = useState('');

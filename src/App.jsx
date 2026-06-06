@@ -7,9 +7,9 @@
 //   Mobile  (≤768px): flex-col — right pane 60vh sticky top | ContentOverlay scrollable below
 
 import { useRef, useState, useCallback } from 'react';
-import ContentOverlay from './components/ContentOverlay';
-import RobotCanvas from './components/RobotCanvas';
-import HudOverlay from './components/HudOverlay';
+import ContentOverlay from '../include/ContentOverlay';
+import RobotCanvas from '../include/RobotCanvas';
+import HudOverlay from '../include/HudOverlay';
 
 export default function App() {
   const scrollerRef = useRef(null);
