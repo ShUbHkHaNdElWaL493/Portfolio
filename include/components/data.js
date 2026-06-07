@@ -54,7 +54,7 @@ export const phases = [
         ],
       },
       {
-        label: "Mars Rover Students: Electronics Lead",
+        label: "Mars Rover Students",
         role: "Electronics Lead",
         date: "APRIL 2024 – MARCH 2025",
         link: "https://www.linkedin.com/company/mars-rover-students-club-iiitdm-kancheepuram",
