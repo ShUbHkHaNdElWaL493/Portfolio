@@ -70,10 +70,3 @@ Portfolio/
 | 04 | Projects | Sensor mast (LiDAR + stereo camera) | Mast descends and rotates into place |
 | 05 | Achievements | Wheels (6-wheeled rocker-bogie with treads) | Wheels fly in from below |
 | 06 | Contact | Activation (LED glow + wheel spin) | All LEDs light orange; wheels spin up |
-
----
-
-## Customisation Checklist
-
-- [ ] Replace all "Alex Rivera" / contact details in `data.js`
-- [ ] Add your own skills, projects, and achievements to `data.js`
