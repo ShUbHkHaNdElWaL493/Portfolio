@@ -35,25 +35,6 @@ export default function HudOverlay({ activePhase, scrollPct }) {
         fontFamily: "'Share Tech Mono', monospace",
       }}
     >
-      {/* Corner brackets */}
-      {['tl', 'tr', 'bl', 'br'].map(corner => (
-        <div
-          key={corner}
-          style={{
-            position: 'absolute',
-            width: 44,
-            height: 44,
-            top: corner.startsWith('t') ? 10 : 'auto',
-            bottom: corner.startsWith('b') ? 10 : 'auto',
-            left: corner.endsWith('l') ? 10 : 'auto',
-            right: corner.endsWith('r') ? 10 : 'auto',
-            borderTop: corner.startsWith('t') ? '1px solid rgba(255,122,0,0.35)' : 'none',
-            borderBottom: corner.startsWith('b') ? '1px solid rgba(255,122,0,0.35)' : 'none',
-            borderLeft: corner.endsWith('l') ? '1px solid rgba(255,122,0,0.35)' : 'none',
-            borderRight: corner.endsWith('r') ? '1px solid rgba(255,122,0,0.35)' : 'none',
-          }}
-        />
-      ))}
 
       {/* Top-left readout */}
       <div style={{ position: 'absolute', top: 18, left: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em' }}>
@@ -62,42 +43,27 @@ export default function HudOverlay({ activePhase, scrollPct }) {
         STATE: {phases[activePhase]?.state}
       </div>
 
-      {/* Bottom-left readout */}
-      <div style={{ position: 'absolute', bottom: 18, left: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em' }}>
-        {utcTime}<br />
-        CAM: PERSPECTIVE 45°<br />
-        FOCAL: 0.1 – 200m
-      </div>
-
-      {/* Bottom-right readout */}
-      <div style={{ position: 'absolute', bottom: 18, right: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em', textAlign: 'right' }}>
-        SCROLL: {Math.round(scrollPct).toString().padStart(3, ' ')}%<br />
-        GRID: 18×18 / 36 DIV<br />
-        WIREFRAME: PARTIAL
-      </div>
-
-      {/* Bottom phase dots */}
+      {/* Top-Right phase dots */}
       <div style={{
         position: 'absolute',
-        bottom: 24,           // Anchors to the bottom
-        left: '50%',          // Moves to the center
-        transform: 'translateX(-50%)', // Perfectly centers it
+        top: 24,              // Anchors to the top
+        right: 24,            // Anchors to the right
         display: 'flex',
-        flexDirection: 'row', // Lays out dots left-to-right
-        gap: 16,              // Space between each phase dot
-        alignItems: 'flex-end', // Keeps the dots aligned at the bottom
+        flexDirection: 'column', // Stacks the dots vertically
+        gap: 12,              // Spacing between each row
+        alignItems: 'flex-end',  // Keeps the dots perfectly flush to the right
       }}>
         {phases.map((ph, i) => (
           <div key={i} style={{ 
             display: 'flex', 
-            flexDirection: 'column', 
+            flexDirection: 'row', // Places text horizontally next to the dot
             alignItems: 'center', 
-            gap: 6 
+            gap: 8 
           }}>
+            {/* Phase Text appears to the left of the active dot */}
             {activePhase === i && (
               <span style={{ 
-                fontSize: 12, 
-                // Make the text green if it is the last phase
+                fontSize: 10, 
                 color: i === phases.length - 1 ? 'rgba(0,255,136,0.8)' : 'rgba(255,122,0,0.7)', 
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase'
@@ -105,11 +71,12 @@ export default function HudOverlay({ activePhase, scrollPct }) {
                 {ph.phase}
               </span>
             )}
+            
+            {/* The Dot */}
             <div style={{
               width: activePhase === i ? 7 : 4,
               height: activePhase === i ? 7 : 4,
               borderRadius: '50%',
-              // Swap to green colors if it is the final index
               background: activePhase === i 
                 ? (i === phases.length - 1 ? '#00ff88' : '#FF7A00') 
                 : (i === phases.length - 1 ? 'rgba(0,255,136,0.2)' : 'rgba(255,122,0,0.2)'),
@@ -120,6 +87,26 @@ export default function HudOverlay({ activePhase, scrollPct }) {
             }} />
           </div>
         ))}
+      </div>
+
+      {/* Bottom-left readout */}
+      <div
+      className="hide-on-mobile"
+      style={{ position: 'absolute', bottom: 18, left: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em' }}
+      >
+        {utcTime}<br />
+        CAM: PERSPECTIVE 45°<br />
+        FOCAL: 0.1 – 200m
+      </div>
+
+      {/* Bottom-right readout */}
+      <div
+      className="hide-on-mobile"
+      style={{ position: 'absolute', bottom: 18, right: 20, fontSize: 12, color: 'rgba(255,122,0,0.55)', lineHeight: 1.9, letterSpacing: '0.14em', textAlign: 'right' }}
+      >
+        SCROLL: {Math.round(scrollPct).toString().padStart(3, ' ')}%<br />
+        GRID: 18×18 / 36 DIV<br />
+        WIREFRAME: PARTIAL
       </div>
 
       {/* Scan line overlay (CSS) */}

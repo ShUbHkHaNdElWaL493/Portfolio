@@ -93,19 +93,23 @@ export default function App() {
         }
 
         /* --- MOBILE LAYOUT OVERRIDES --- */
-        @media (max-width: 768px) {
+        @media (orientation: portrait) {
           .app-wrapper {
-            flex-direction: column-reverse;
+            flex-direction: column;
           }
           .left-pane {
             width: 100%;
             height: 70vh;
             border-right: none;
-            border-top: 1px solid rgba(255,122,0,0.2);
+            border-top: none;
+            border-bottom: 1px solid rgba(255,122,0,0.2);
           }
           .right-pane {
             width: 100%;
             height: 30vh;
+          }
+          .hide-on-mobile {
+            display: none !important;
           }
         }
       `}</style>
