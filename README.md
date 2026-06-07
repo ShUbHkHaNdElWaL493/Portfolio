@@ -1,5 +1,5 @@
 # Shubh Khandelwal's Interactive 3-D Portfolio
-> A scroll-linked 3-D portfolio where a rover is procedurally assembled piece-by-piece as you navigate through the resume sections.
+> A scroll-linked 3-D portfolio where a rover is procedurally assembled piece-by-piece as you navigate through the portfolio sections.
 
 ---
 
@@ -29,10 +29,12 @@ Portfolio/
     └── components/
         ├── data.js               ← 6 phase content objects (tags, metrics, timeline…)
         └── robotBuilder.js       ← Procedural geometry: all robot parts built from BoxGeometry, CylinderGeometry, etc. No .glb files.
+└── public/
+    ├── favicon.ico
+    └── Shubh_Khandelwal.png
 └── src/
     └── App.jsx                   ← Root layout, shared state (activePhase, scrollPct)
 ├── index.html                    ← Vite entry, font imports
-├── favicon.ico
 ├── main.jsx                      ← ReactDOM root mount
 ├── package.json
 ├── package-lock.json
@@ -51,12 +53,6 @@ Portfolio/
 | 3D rendering | Three.js (vanilla, no R3F wrapper for max scroll-sync control) |
 | Scroll animations | GSAP 3 + ScrollTrigger plugin |
 | Fonts | Share Tech Mono · Exo 2 · Rajdhani (Google Fonts) |
-
-> **Why vanilla Three.js instead of R3F?**  
-> GSAP ScrollTrigger needs direct access to `onUpdate` callbacks that mutate Three.js
-> object properties. R3F's render loop and React reconciler add indirection that can
-> cause frame-timing issues with scrubbed scroll. Using the renderer directly gives
-> deterministic, zero-jank scroll-linked animation.
 
 ---
 
