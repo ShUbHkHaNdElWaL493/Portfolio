@@ -135,7 +135,7 @@ export const phases = [
     content: `Looking forward to meeting new people and getting new experiences.`,
     links: [
       { icon: '📞', label: 'Call me here.', type: 'phone', href: 'tel:+919416060103' },
-      { icon: '📧', label: 'Send me an e-mail here.', type: 'email', href: 'mailto:shubh4664@gmail.com' },
+      { icon: '📧', label: 'Send me an e-mail.', type: 'email', href: 'mailto:shubh4664@gmail.com' },
       { icon: '🔗', label: 'My LinkedIn profile.', type: 'linkedin', href: 'https://www.linkedin.com/in/shubh--khandelwal/' },
       { icon: '💻', label: 'My Github account.', type: 'github', href: 'https://github.com/ShUbHkHaNdElWaL493' },
     ],

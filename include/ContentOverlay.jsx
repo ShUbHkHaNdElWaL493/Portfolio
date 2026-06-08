@@ -206,7 +206,7 @@ function ContactLinks({ links }) {
             color: '#d0d8e8',
             textDecoration: 'none',
             fontFamily: "'Share Tech Mono', monospace",
-            fontSize: 11,
+            fontSize: 14,
             letterSpacing: '0.05em',
             transition: 'all 0.2s',
           }}
