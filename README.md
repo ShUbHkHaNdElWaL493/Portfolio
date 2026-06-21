@@ -5,9 +5,13 @@
 
 ## Quick Start
 
-Build for development testing using `vite`:
+Install dependencies using `npm`:
 ```bash
 npm install
+```
+
+Build for development testing using `vite`:
+```bash
 npm run dev
 ```
 
