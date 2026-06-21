@@ -86,7 +86,7 @@ export const phases = [
       },
       {
         label: "Autonomous Manipulator Control using RL",
-        link: "https://github.com/ShUbHkHaNdElWaL493/skrl-ik",
+        link: "https://github.com/ShUbHkHaNdElWaL493/shkrl-ik",
         bullets: [
           "Designed and simulated a 4-DoF robotic arm using Xacro, ROS2 Jazzy, Rviz and Gazebo Sim for real-time applications.",
           "Developed reinforcement learning training environments using Gymnasium integrated with rclpy nodes.",
