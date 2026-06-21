@@ -86,7 +86,7 @@ export const phases = [
       },
       {
         label: "Autonomous Manipulator Control using RL",
-        link: "https://github.com/ShUbHkHaNdElWaL493/Manipulator-Control-Using-Reinforcement-Learning",
+        link: "https://github.com/ShUbHkHaNdElWaL493/skrl-ik",
         bullets: [
           "Designed and simulated a 4-DoF robotic arm using Xacro, ROS2 Jazzy, Rviz and Gazebo Sim for real-time applications.",
           "Developed reinforcement learning training environments using Gymnasium integrated with rclpy nodes.",
@@ -134,7 +134,6 @@ export const phases = [
     title: 'Contact Information',
     content: `Looking forward to meeting new people and getting new experiences.`,
     links: [
-      { icon: '📞', label: 'Call me here.', type: 'phone', href: 'tel:+919416060103' },
       { icon: '📧', label: 'Send me an e-mail.', type: 'email', href: 'mailto:shubh4664@gmail.com' },
       { icon: '🔗', label: 'My LinkedIn profile.', type: 'linkedin', href: 'https://www.linkedin.com/in/shubh--khandelwal/' },
       { icon: '💻', label: 'My Github account.', type: 'github', href: 'https://github.com/ShUbHkHaNdElWaL493' },
