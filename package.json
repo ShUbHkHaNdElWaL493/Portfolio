@@ -1,30 +1,29 @@
 {
-  "name": "rover-portfolio",
-  "homepage": "https://ShUbHkHaNdElWaL493.github.io/Portfolio/",
-  "version": "1.0.0",
+  "name": "robotics-portfolio",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/exo-2": "^5.2.8",
-    "@fontsource/rajdhani": "^5.2.7",
-    "@fontsource/share-tech-mono": "^5.2.7",
-    "gsap": "^3.12.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "three": "^0.167.1"
+    "@react-three/drei": "^10.0.0",
+    "@react-three/fiber": "^9.0.0",
+    "framer-motion": "^12.0.0",
+    "maath": "^0.10.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "three": "^0.172.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "gh-pages": "^6.3.0",
-    "vite": "^5.3.4"
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "sharp@0.33.5": true
   }
 }

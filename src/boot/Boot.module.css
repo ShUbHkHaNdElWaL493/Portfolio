@@ -1,0 +1,7 @@
+.boot { position: fixed; inset: 0; z-index: 100; background: #070a0e; color: var(--ok); padding: clamp(1rem, 4vw, 3rem);
+  display: flex; flex-direction: column; justify-content: space-between; font-size: 0.85rem; }
+.log { margin: 0; white-space: pre-wrap; line-height: 1.6; }
+.warn { color: var(--signal); }
+.cursor { display: inline-block; width: 0.6em; height: 1em; background: currentColor; vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+.skip { align-self: flex-end; font: inherit; color: var(--text-dim); background: none; border: 1px solid var(--line); padding: 0.3rem 0.8rem; cursor: pointer; }
+@keyframes blink { 50% { opacity: 0; } }
