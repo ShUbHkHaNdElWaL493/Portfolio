@@ -47,11 +47,34 @@ function buildRig(model) {
   model.updateMatrixWorld(true);
   const at = (name) => model.getObjectByName(name).getWorldPosition(new THREE.Vector3());
 
+  // Helper to convert MeshPhysicalMaterial down to MeshStandardMaterial
+  const toStandardMaterial = (mat) => {
+    if (mat && mat.isMeshPhysicalMaterial) {
+      const std = new THREE.MeshStandardMaterial();
+      std.copy(mat); // Copies color, textures, roughness, metalness, and maps
+      mat.dispose();
+      return std;
+    }
+    return mat;
+  };
+
   model.traverse((o) => {
     if (!o.isMesh) return;
+
+    // 1. Hide cel-shading outline mesh layers lacking UV attributes
+    if (!o.geometry.attributes || !o.geometry.attributes.uv) {
+      o.visible = false;
+      return;
+    }
+
+    // 2. Prevent shader varying overflow by replacing physical materials
+    if (Array.isArray(o.material)) {
+      o.material = o.material.map(toStandardMaterial);
+    } else if (o.material) {
+      o.material = toStandardMaterial(o.material);
+    }
+
     o.castShadow = true;
-    // A skinned mesh is culled using its bind-pose bounds, so it could vanish
-    // when the arm swings outside them. Never cull it.
     o.frustumCulled = false;
   });
 
@@ -64,8 +87,6 @@ function buildRig(model) {
   // How far can the pad go? Measure the two big links (rocker + long arm).
   const shoulder = at('Core_02'), elbow = at('ArmLong_05'), wrist = at('ArmShort_07');
   const reach = (shoulder.distanceTo(elbow) + elbow.distanceTo(wrist)) * ROBOT_SCALE;
-  // The pad hangs straight below the wrist, so the pad's reachable region is a
-  // sphere of radius `reach` centred this far below the shoulder.
   const wristDrop = wrist.distanceTo(at(TOOL_BONE)) * ROBOT_SCALE + TOOL_LENGTH;
   const shoulderWorld = shoulder.multiplyScalar(ROBOT_SCALE).applyQuaternion(ROBOT_QUAT).add(position);
   const reachCenter = shoulderWorld.setY(shoulderWorld.y - wristDrop);
