@@ -80,7 +80,7 @@ const rubber = new THREE.MeshStandardMaterial({ color: '#0d0f11', roughness: 0.6
 const lipRubber = new THREE.MeshStandardMaterial({ color: '#f2a33a', roughness: 0.5, metalness: 0.1 }); // the safety-orange accent
 const hoseMat = new THREE.MeshStandardMaterial({ color: '#15191e', roughness: 0.55, metalness: 0.2 });
 
-export default function VacuumPad({ ref }) {
+export default function VacuumPad({ ref, position = [0, 0, 0], orientation = [0, 0, 0] }) {
   // Geometry is built once and shared by all seven cups.
   const bellows = useMemo(() => new THREE.LatheGeometry(bellowsProfile(), 28), []);
 
@@ -98,49 +98,52 @@ export default function VacuumPad({ ref }) {
 
   return (
     <group ref={ref}>
-      {/* 1. Adapter ring bolted to the robot's flange */}
-      <mesh position={[0, Y_ADAPTER + ADAPTER_H / 2, 0]} material={anodized} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, ADAPTER_H, 32]} />
-      </mesh>
-      {BOLT_POSITIONS.map(([x, z], i) => (
-        <mesh key={i} position={[x, Y_ADAPTER + ADAPTER_H + 0.004, z]} material={steel}>
-          <cylinderGeometry args={[0.009, 0.009, 0.008, 6]} />
+      {/* Inner offset group: shifts and rotates the geometry in local tool space */}
+      <group position={position} rotation={orientation}>
+        {/* 1. Adapter ring bolted to the robot's flange */}
+        <mesh position={[0, Y_ADAPTER + ADAPTER_H / 2, 0]} material={anodized} castShadow>
+          <cylinderGeometry args={[0.08, 0.08, ADAPTER_H, 32]} />
         </mesh>
-      ))}
-
-      {/* 2. Swivel neck, with a collar ring in the middle */}
-      <mesh position={[0, Y_NECK + NECK_H / 2, 0]} material={steel} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, NECK_H, 32]} />
-      </mesh>
-      <mesh position={[0, Y_NECK + NECK_H * 0.35, 0]} material={anodized}>
-        <cylinderGeometry args={[0.063, 0.063, 0.014, 32]} />
-      </mesh>
-
-      {/* 3. Air fitting on the side of the neck, and the hose leaving it */}
-      <mesh position={[0.065, Y_NECK + 0.045, 0]} rotation={[0, 0, Math.PI / 2]} material={steel}>
-        <cylinderGeometry args={[0.016, 0.016, 0.05, 16]} />
-      </mesh>
-      <mesh geometry={hose} material={hoseMat} castShadow />
-
-      {/* 4. Manifold plate: a chamfered disc (narrower at the top) with a thin rim */}
-      <mesh position={[0, Y_PLATE + PLATE_H / 2, 0]} material={anodized} castShadow receiveShadow>
-        <cylinderGeometry args={[PLATE_R - 0.04, PLATE_R, PLATE_H, 48]} />
-      </mesh>
-      <mesh position={[0, Y_CUPS - 0.004, 0]} material={steel}>
-        <cylinderGeometry args={[PLATE_R + 0.002, PLATE_R + 0.002, 0.008, 48]} />
-      </mesh>
-
-      {/* 5. The seven suction cups. LatheGeometry points along +Y, which is "outward". */}
-      {CUP_POSITIONS.map(([x, z], i) => (
-        <group key={i} position={[x, Y_CUPS, z]}>
-          <mesh geometry={bellows} material={rubber} castShadow />
-          {/* orange sealing lip: a thin ring around the rim of the cup */}
-          {/* (a torus is drawn flat in the XY plane, so tip it 90° to lie around the Y axis) */}
-          <mesh position={[0, CUP_H, 0]} rotation={[Math.PI / 2, 0, 0]} material={lipRubber}>
-            <torusGeometry args={[CUP_LIP_R - 0.006, 0.006, 8, 28]} />
+        {BOLT_POSITIONS.map(([x, z], i) => (
+          <mesh key={i} position={[x, Y_ADAPTER + ADAPTER_H + 0.004, z]} material={steel}>
+            <cylinderGeometry args={[0.009, 0.009, 0.008, 6]} />
           </mesh>
-        </group>
-      ))}
+        ))}
+
+        {/* 2. Swivel neck, with a collar ring in the middle */}
+        <mesh position={[0, Y_NECK + NECK_H / 2, 0]} material={steel} castShadow>
+          <cylinderGeometry args={[0.05, 0.05, NECK_H, 32]} />
+        </mesh>
+        <mesh position={[0, Y_NECK + NECK_H * 0.35, 0]} material={anodized}>
+          <cylinderGeometry args={[0.063, 0.063, 0.014, 32]} />
+        </mesh>
+
+        {/* 3. Air fitting on the side of the neck, and the hose leaving it */}
+        <mesh position={[0.065, Y_NECK + 0.045, 0]} rotation={[0, 0, Math.PI / 2]} material={steel}>
+          <cylinderGeometry args={[0.016, 0.016, 0.05, 16]} />
+        </mesh>
+        <mesh geometry={hose} material={hoseMat} castShadow />
+
+        {/* 4. Manifold plate: a chamfered disc (narrower at the top) with a thin rim */}
+        <mesh position={[0, Y_PLATE + PLATE_H / 2, 0]} material={anodized} castShadow receiveShadow>
+          <cylinderGeometry args={[PLATE_R - 0.04, PLATE_R, PLATE_H, 48]} />
+        </mesh>
+        <mesh position={[0, Y_CUPS - 0.004, 0]} material={steel}>
+          <cylinderGeometry args={[PLATE_R + 0.002, PLATE_R + 0.002, 0.008, 48]} />
+        </mesh>
+
+        {/* 5. The seven suction cups. LatheGeometry points along +Y, which is "outward". */}
+        {CUP_POSITIONS.map(([x, z], i) => (
+          <group key={i} position={[x, Y_CUPS, z]}>
+            <mesh geometry={bellows} material={rubber} castShadow />
+            {/* orange sealing lip: a thin ring around the rim of the cup */}
+            {/* (a torus is drawn flat in the XY plane, so tip it 90° to lie around the Y axis) */}
+            <mesh position={[0, CUP_H, 0]} rotation={[Math.PI / 2, 0, 0]} material={lipRubber}>
+              <torusGeometry args={[CUP_LIP_R - 0.006, 0.006, 8, 28]} />
+            </mesh>
+          </group>
+        ))}
+      </group>
     </group>
   );
 }

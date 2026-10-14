@@ -37,10 +37,11 @@ import * as THREE from 'three';
  * rotated, so they simply ride along rigidly with their parent.
  */
 export const JOINTS = [
-  { name: 'yaw',      bone: 'Shoulder_01', axis: [0, 1, 0], min: -110, max: 110 }, // spins the whole arm around the base
-  { name: 'shoulder', bone: 'Core_02',     axis: [0, 0, 1], min: -60,  max: 100 }, // raises / lowers the long white rocker
-  { name: 'elbow',    bone: 'ArmLong_05',  axis: [0, 0, 1], min: -20,  max: 125 }, // bends the long forearm against the rocker
-  { name: 'wrist',    bone: 'ArmShort_07', axis: [0, 0, 1], min: -235, max: -100 }, // tilts the hand so the tool can point down
+  { name: 'yaw',          bone: 'Shoulder_01',    axis: [0, 1, 0], min: -270, max: 270 },
+  { name: 'shoulder',     bone: 'Core_02',        axis: [0, 0, 1], min: -180, max: 0 },
+  { name: 'elbow',        bone: 'ArmLong_05',     axis: [0, 0, 1], min: -45, max: 225 },
+  { name: 'wrist_pitch',  bone: 'ArmShort_07',    axis: [0, 0, 1], min: -45, max: 45 },
+  { name: 'wrist_pitch2', bone: 'ArmShorter_08',  axis: [0, 0, 1], min: -45, max: 45 },
 ];
 
 /** The direction the tool must point in: straight down. */
@@ -49,6 +50,9 @@ const DOWN = new THREE.Vector3(0, -1, 0);
 // Scratch objects, reused every call so we do not allocate in the render loop.
 const _q = new THREE.Quaternion();
 const _p = new THREE.Vector3();
+
+const _toolPosition = new THREE.Vector3();
+const _toolOrientation = new THREE.Quaternion();
 
 export class ArmIK {
   /**
@@ -63,6 +67,7 @@ export class ArmIK {
     // The distance from the tool bone to the pad's contact surface, measured along
     // the bone's own axis, in scene units. The owner of this object sets it.
     this.toolLength = 0;
+    this.toolOffset = new THREE.Vector3(0, 0, 0); // Local [x, y, z] offset in scene units
 
     // One entry per joint with everything we need to rotate it and build the Jacobian.
     this.joints = JOINTS.map((j) => {
@@ -111,9 +116,16 @@ export class ArmIK {
     // the solver never reads stale matrices, even on the very first frame.
     this.root.updateWorldMatrix(true, true);
 
-    // Tool direction = the tool bone's local +Y axis, expressed in world space.
+    // Tool direction = bone's local +Y axis in world space
+    this.toolBone.getWorldQuaternion(_toolOrientation);
+
+    // Tip position = bone origin + (toolOffset + toolLength along Y) rotated into world space
+    _toolPosition
+      .set(this.toolOffset.x, this.toolLength + this.toolOffset.y, this.toolOffset.z)
+      .applyQuaternion(_toolOrientation);
+    
     this.toolDir.set(0, 1, 0).transformDirection(this.toolBone.matrixWorld);
-    this.tip.setFromMatrixPosition(this.toolBone.matrixWorld).addScaledVector(this.toolDir, this.toolLength);
+    this.tip.setFromMatrixPosition(this.toolBone.matrixWorld).add(_toolPosition);
   }
 
   /**

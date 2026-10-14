@@ -39,6 +39,9 @@ const _hit = new THREE.Vector3();
 const ENGAGE = 0.92;
 const COMFORT = 0.9; // fraction of the arm's full stretch we are willing to use
 
+// Define the offset in one place so visual geometry and IK stay in sync
+const TOOL_POSITION = new THREE.Vector3(0.48, 0, -0.02);
+
 /**
  * One-time preparation of the loaded model. Runs before the model is placed in
  * the scene, so the model is still in its original coordinates.
@@ -80,16 +83,29 @@ function buildRig(model) {
 
   const arm = new ArmIK(model, TOOL_BONE);
   arm.toolLength = TOOL_LENGTH;
+  arm.toolOffset.copy(TOOL_POSITION);
 
   // Shift the model so the middle of its base plate sits on the world origin.
   const position = at('Base_00').multiplyScalar(ROBOT_SCALE).applyQuaternion(ROBOT_QUAT).negate();
 
   // How far can the pad go? Measure the two big links (rocker + long arm).
-  const shoulder = at('Core_02'), elbow = at('ArmLong_05'), wrist = at('ArmShort_07');
-  const reach = (shoulder.distanceTo(elbow) + elbow.distanceTo(wrist)) * ROBOT_SCALE;
-  const wristDrop = wrist.distanceTo(at(TOOL_BONE)) * ROBOT_SCALE + TOOL_LENGTH;
-  const shoulderWorld = shoulder.multiplyScalar(ROBOT_SCALE).applyQuaternion(ROBOT_QUAT).add(position);
-  const reachCenter = shoulderWorld.setY(shoulderWorld.y - wristDrop);
+  const shoulder = at('Core_02');
+  const elbow = at('ArmLong_05');
+  const wrist1 = at('ArmShort_07');
+  const wrist2 = at('ArmShorter_08');
+  const toolBone = at(TOOL_BONE);
+
+  // 1. Full mechanical reach: shoulder -> elbow -> wrist -> tool flange -> pad tip
+  const armLinksLength = (
+    shoulder.distanceTo(elbow) +
+    elbow.distanceTo(wrist1) +
+    wrist1.distanceTo(wrist2) +
+    wrist2.distanceTo(toolBone)
+  ) * ROBOT_SCALE;
+  const reach = armLinksLength + TOOL_LENGTH;
+
+  // 2. Center the reach sphere at the shoulder pivot in world coordinates
+  const reachCenter = shoulder.clone().multiplyScalar(ROBOT_SCALE).applyQuaternion(ROBOT_QUAT).add(position);
 
   return { arm, position, reach, reachCenter };
 }
@@ -226,7 +242,7 @@ export default function Robot({ onReady }) {
     }
 
     // Inverse kinematics: turn the target position into joint angles (and move the bones).
-    arm.solve(a.tgt, 6);
+    arm.solve(a.tgt, 14);
     rig.tip.copy(arm.tip); // boxes read this to know where the pad is
 
     syncPad();
@@ -240,7 +256,11 @@ export default function Robot({ onReady }) {
       </group>
       {/* The pad lives outside that group (so the scale above doesn't shrink it);
           the frame loop above moves it to the arm's tip. */}
-      <VacuumPad ref={pad} />
+      <VacuumPad 
+        ref={pad}
+        position={TOOL_POSITION.toArray()} // Adjust X/Y/Z directly in local pad coordinates
+        orientation={[0, 0, 0]}
+      />
     </>
   );
 }
