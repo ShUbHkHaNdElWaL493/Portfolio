@@ -1,53 +1,59 @@
 # Portfolio Features & UX
 
-This document details the user experience, interactive elements, animation specifics, and feature set of the 3D robotics portfolio.
+This document details the user experience, interactive elements, and feature set of the 3D robotics portfolio.
 
 ---
 
 ### Core Interactions
 
-*   **Interactive Robotic Manipulator:** The centerpiece of the site. A fully rigged, 3D industrial robot arm driven by a custom IK solver that acts as the primary navigation tool.
-*   **Physical Navigation Boxes:** Four distinct 3D boxes rest in the world frame, labeled:
+*   **Interactive Robotic Manipulator:** The centerpiece of the site. A rigged industrial robot arm driven by a custom IK solver, which acts as the primary navigation tool.
+*   **Vacuum Pad End Effector:** A detailed multi-cup suction gripper (adapter ring with bolts, swivel neck, air fitting and hose, chamfered manifold plate, seven bellows cups with orange sealing lips) that lifts the boxes by their top face.
+*   **Physical Navigation Boxes:** Four 3D boxes rest in the world frame, labeled:
     *   *Education & Skills*
     *   *Experience*
     *   *Projects*
     *   *Achievements*
-*   **Hybrid Rendering (Gibberish to Clarity):** To maintain the illusion of reading the physical boxes while preserving SEO and accessibility, the actual 3D textures on the boxes display stylized "gibberish." The readable text is exclusively rendered via the 2D DOM Lens Overlay.
+*   **Text Printed On The Boxes:** Each box carries its real content on its front face in terminal style. In the overview the titles are visible; when the arm holds a box up to the camera the full text fills the screen. Nothing is overlaid on the 3D view.
 
 ---
 
-### The Lens Overlay & Navigation 
+### Reading & Navigation
 
-When the manipulator halts holding a box to the camera, a specialized DOM UI activates:
+When the manipulator halts holding a box to the camera (`FOCUS`):
 
-*   **Turret Animation:** The overlay enters the screen mimicking a microscope's rotating turret mechanism. A circular mask sweeps in from the side, simulating a mechanical lens clicking into place over the box.
-*   **Data Delivery:** Inside the lens mask, the crisp, readable HTML/CSS content (Experience, Projects, etc.) is rendered.
-*   **Lens UI Panel:**
-    *   *Bottom Edge:* A dedicated "Return/Replace Box" button to dismiss the current view.
-    *   *Right Edge:* A vertical navigation panel listing the other box categories.
-*   **Seamless Swapping:** Clicking a new category in the right panel instantly drops the Lens UI. The manipulator autonomously returns the current box to its respective stack, picks up the newly requested box, and brings it to the camera, re-triggering the turret animation.
+*   **Close-up Camera:** The camera eases in until the box face fills most of the screen (computed from the viewport, so it also works on phones).
+*   **Command Bar:** A terminal-style row at the bottom of the stage:
+    *   one button per box (`[1] education` ... `[4] achievements`) to swap boxes,
+    *   `[esc] put back` to return the box and go idle.
+*   **Keyboard:** `1`-`4` pick or swap a box, `Esc` puts it back.
+*   **Seamless Swapping:** Choosing another box makes the manipulator return the current one to its slot, pick up the new one and bring it to the camera, with no screen change in between.
 
 ---
 
 ### UI Layout & Responsiveness
 
-The interface adapts seamlessly between desktop and mobile constraints to prevent interaction conflicts.
+The interface adapts between desktop and mobile constraints to prevent interaction conflicts.
 
 | Surface | Layout Structure | Canvas Behavior |
 | --- | --- | --- |
-| **Desktop** | **Left Panel (30%)** | Static. Contains Name, Professional Summary, and Contact Info. |
-| | **Right Panel (70%)** | 3D World Canvas. Full interaction. Mouse tracking enabled for the manipulator idle state via IK solver. |
+| **Desktop** | **Left Panel (30%)** | Static. A terminal session with Name, Professional Summary, and Contact Info. |
+| | **Right Panel (70%)** | 3D World Canvas with status line and command bar. Mouse tracking enabled for the manipulator idle state via IK solver. |
 | **Mobile** | **Top** | Name & Summary. |
-| | **Middle** | 3D Canvas (locked height, e.g., 60vh). Manipulator rests in a static default pose to prevent touch-conflict. |
-| | **Bottom** | Contact Info. Touch-to-select only. Scroll-jacking is disabled to allow standard page swiping. |
+| | **Middle** | 3D Canvas (locked height, 60vh). Manipulator rests in a static default pose to prevent touch-conflict. Vertical swipes still scroll the page. |
+| | **Bottom** | Contact Info. Touch-to-select only. |
 
 ---
 
-### Animation & Visual Polish
+### Visual Theme
 
-*   **Terminal Boot Sequence:** The initial loading screen simulates a ROS (Robot Operating System) terminal boot sequence, outputting system checks and joint calibrations while the `.glb` files and IK solvers initialize in the background.
-*   **Real-time Cursor Tracking:** When the user is inactive on desktop, the manipulator's end-effector dynamically reaches toward the user's mouse cursor using the IK solver, making the arm feel highly responsive and alive.
-*   **Absolute Kinematic Locking:** To prevent visual jitter or clipping when the user is reading text, the IK solver strictly locks all wrist and joint rotations the moment the box enters the `FOCUS` state.
-*   **Smooth Interpolation:** The camera does not snap to positions. It uses smooth interpolation (via GSAP or Three.js math) to transition fluidly between the macro world view and the locked-in box reading view.
+*   **Terminal Look Everywhere:** The main screen uses the boot screen's palette: near-black background, phosphor-green monospace text, a single safety-orange accent, `[ INFO]`-style log lines and `robot:~$` prompts. The 3D floor, grid and box faces use the same colours. All colours are CSS variables at the top of `style.css`.
+*   **Terminal Boot Sequence:** The initial loading screen simulates a ROS (Robot Operating System) boot, printing system checks and joint calibrations (matching the real model: four joints, seven cups) while the `.glb` loads in the background.
 
 ---
+
+### Motion & Polish
+
+*   **Real-time Cursor Tracking:** On desktop, when idle, the pad reaches toward the mouse cursor using the IK solver. Tracking starts inside 92% of the comfortable reach and continues to 100% (hysteresis), so it never flickers at the boundary.
+*   **Absolute Kinematic Locking:** To prevent jitter while the visitor reads, the solver touches no joint at all in the `FOCUS` state, and the box orientation is fixed exactly parallel to the camera.
+*   **Smooth Interpolation:** Neither the arm target nor the camera snaps; both use critically damped easing (`maath`).
+*   **Reduced Motion:** The only CSS animation left is the blinking terminal cursor, which is disabled for visitors who request reduced motion.

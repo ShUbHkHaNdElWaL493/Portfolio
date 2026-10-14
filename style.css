@@ -1,0 +1,178 @@
+/* ============================================================================
+   style.css — the ONLY stylesheet for the whole site.
+
+   THE THEME
+   Everything uses the look of the boot screen: near-black background,
+   phosphor-green text, a monospace font and one orange accent (a "servo LED").
+   To re-colour the site, change the variables in :root below — nothing else.
+
+   SECTIONS
+     1. Variables        4. Stage (3D canvas, status line, command bar)
+     2. Base             5. Boot screen
+     3. Layout & panel   6. Small screens / accessibility
+   ========================================================================== */
+
+/* 1. VARIABLES ------------------------------------------------------------ */
+:root {
+  --bg: #070a0e;        /* page background (same as the boot screen) */
+  --bg-raised: #0c1117; /* buttons and panels sitting on the background */
+  --line: #1b3b2e;      /* borders and dividers */
+  --fg: #4cc38a;        /* main text: phosphor green */
+  --fg-bright: #8cf0bd; /* headings */
+  --fg-dim: #2f7d5a;    /* secondary text, prompts */
+  --signal: #f2a33a;    /* the single accent colour: safety orange */
+
+  --font: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --panel-w: 30%;       /* width of the left panel on desktop */
+  --z-ui: 10;           /* HTML sits above the 3D canvas */
+}
+
+/* 2. BASE ----------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration-color: var(--fg-dim); text-underline-offset: 3px; }
+a:hover { color: var(--fg-bright); text-decoration-color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+/* Buttons share one terminal look: flat, bordered, monospace. */
+button {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--signal); color: var(--fg-bright); }
+button:disabled { color: var(--fg-dim); cursor: default; opacity: 0.55; }
+
+/* A blinking block cursor, used on the boot screen and the last prompt line. */
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  background: currentColor;
+  vertical-align: text-bottom;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Visually hidden but still readable by search engines and screen readers. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+/* 3. LAYOUT & SIDE PANEL -------------------------------------------------- */
+.shell {
+  display: grid;
+  grid-template-columns: var(--panel-w) 1fr; /* desktop: 30% panel | 70% stage */
+  min-height: 100svh;
+}
+
+.panel {
+  position: relative;
+  z-index: var(--z-ui);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* identity at the top, contact at the bottom */
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-right: 1px solid var(--line);
+}
+
+.line { margin: 0 0 0.35rem; }
+.prompt { color: var(--fg-dim); }
+.tag { color: var(--signal); }
+
+.panel h1 {
+  margin: 0.2rem 0 0.1rem;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.1;
+  color: var(--fg-bright);
+  text-shadow: 0 0 10px rgba(76, 195, 138, 0.35); /* faint phosphor glow */
+}
+.panel__role { margin: 0 0 1.25rem; color: var(--signal); }
+.panel__summary { margin: 0; max-width: 42ch; color: var(--fg); }
+.panel__contact { display: grid; gap: 0.3rem; font-style: normal; }
+.credit { margin: 1.25rem 0 0; font-size: 0.7rem; line-height: 1.4; color: var(--fg-dim); }
+
+/* 4. STAGE ---------------------------------------------------------------- */
+.stage {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 70%, #0d1a15 0%, var(--bg) 70%);
+}
+.stage__canvas { position: absolute; inset: 0; }
+.stage canvas { touch-action: pan-y; } /* vertical swipes still scroll the page on phones */
+
+/* Status line (top) and command bar (bottom) float over the canvas. Their
+   containers ignore the mouse so the canvas underneath still receives it
+   (the robot follows the cursor); only the buttons are clickable. */
+.status, .cmdbar {
+  position: absolute;
+  left: 0; right: 0;
+  z-index: var(--z-ui);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+.status { top: 0; color: var(--fg-dim); }
+.status__phase { color: var(--fg); }
+.status__phase--focus { color: var(--signal); }
+.status__phase--fetching, .status__phase--swapping { color: var(--signal); }
+.status__hint { margin-left: auto; }
+
+.cmdbar { bottom: 0; align-items: center; }
+.cmdbar__prompt { color: var(--fg-dim); }
+.cmd { pointer-events: auto; font-size: 0.8rem; }
+.cmd--active { border-color: var(--fg); color: var(--fg-bright); opacity: 1 !important; }
+.cmd--release { margin-left: auto; border-color: var(--signal); color: var(--signal); }
+
+/* 5. BOOT SCREEN ---------------------------------------------------------- */
+.boot {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+  opacity: 1;
+  transition: opacity 0.5s; /* keep in sync with FADE_MS in BootScreen.jsx */
+}
+.boot--leaving { opacity: 0; pointer-events: none; }
+.boot__log { margin: 0; white-space: pre-wrap; line-height: 1.6; }
+.boot__warn { color: var(--signal); }
+.boot__skip { align-self: flex-end; color: var(--fg-dim); background: none; }
+
+/* 6. SMALL SCREENS / ACCESSIBILITY --------------------------------------- */
+/* Phones: name on top, 3D stage in the middle (60% of the screen height), contact below. */
+@media (max-width: 767px) {
+  .shell { grid-template-columns: 1fr; grid-template-rows: auto 60vh auto; }
+  .panel { display: contents; } /* let the two halves of the panel become separate grid rows */
+  .panel__identity { grid-row: 1; padding: 1.5rem 1.25rem 1rem; position: relative; z-index: var(--z-ui); }
+  .stage { grid-row: 2; min-height: 0; }
+  .panel__contact { grid-row: 3; padding: 1rem 1.25rem 2rem; position: relative; z-index: var(--z-ui); }
+  .status__hint { display: none; } /* no room for the hint on a narrow screen */
+  .status, .cmdbar { font-size: 0.7rem; padding: 0.5rem 0.6rem; }
+  .cmd { font-size: 0.7rem; padding: 0.3rem 0.5rem; }
+}
+
+/* People who ask their system for less motion: stop the cursor blink. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
