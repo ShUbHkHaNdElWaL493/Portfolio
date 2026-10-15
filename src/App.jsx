@@ -19,13 +19,14 @@ import { useStore, PHASES, detectInputMode } from './store';
 
 // ── Edit these to make the page yours ───────────────────────────────────────
 const PROFILE = {
-  name: 'Your Name',
-  role: 'Robotics Engineer',
-  summary: 'Professional summary goes here. One or two sentences on what you build and who it helps.',
+  name: 'Shubh Khandelwal',
+  role: 'Robotics Software Engineer',
+  summary: 'Robotics Software Engineer deploying ROS2-based autonomous systems for AGVs, UGVs, and industrial manipulators.',
   contact: [
-    { label: 'mail', text: 'you@example.com', href: 'mailto:you@example.com' },
-    { label: 'git', text: 'github.com/your-handle', href: 'https://github.com/your-handle' },
-    { label: 'in', text: 'linkedin.com/in/your-handle', href: 'https://linkedin.com/in/your-handle' },
+    { label: 'github', text: 'ShUbHkHaNdElWaL493', href: 'https://github.com/ShUbHkHaNdElWaL493' },
+    { label: 'linkedin', text: 'shubh--khandelwal', href: 'https://linkedin.com/in/shubh--khandelwal' },
+    { label: 'mail', text: 'shubh4664', href: 'mailto:shubh4664@gmail.com' },
+    { label: 'resume', text: 'main.pdf', href: 'https://shubhkhandelwal493.github.io/Resume/main-rse/main.pdf' },
   ],
 };
 
@@ -64,8 +65,8 @@ function SidePanel() {
         ))}
         <p className="line"><span className="prompt">robot:~$</span> <span className="cursor" /></p>
         <p className="credit">
-          3D model: <a href="https://sketchfab.com/3d-models/kuma-heavy-robot-r-9000s-8b77bdbe705f4e9697790fd404da49a9">KUMA Heavy Robot R-9000S</a> by
-          <a href="https://sketchfab.com/Gevalt">Heinrich</a>, <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>
+          3D model: <a href="https://sketchfab.com/3d-models/kuma-heavy-robot-r-9000s-8b77bdbe705f4e9697790fd404da49a9">KUMA Heavy Robot R-9000S</a> by <a href="https://sketchfab.com/Gevalt">Heinrich</a>
+          , <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>
         </p>
       </address>
     </aside>
@@ -75,24 +76,22 @@ function SidePanel() {
 /** Top line of the stage: shows the state machine, like a log line. */
 function StatusLine() {
   const phase = useStore((s) => s.phase);
-  const activeId = useStore((s) => s.activeId);
   const hint = {
-    [PHASES.IDLE]: 'move the cursor to guide the arm · click a box to pick it up',
-    [PHASES.FETCHING]: 'arm moving…',
-    [PHASES.FOCUS]: 'reading · esc puts the box back',
-    [PHASES.SWAPPING]: 'arm moving…',
+    [PHASES.IDLE]: 'click a box to read its contents',
+    [PHASES.FETCHING]: 'arm moving...',
+    [PHASES.FOCUS]: 'reading...',
+    [PHASES.SWAPPING]: 'arm moving...',
   }[phase];
   return (
     <div className="status" aria-hidden="true">
-      <span className={`status__phase status__phase--${phase.toLowerCase()}`}>[ INFO] state_machine: {phase}</span>
-      <span className="status__box">box: {activeId ?? '-'}</span>
+      <span className={`status__phase status__phase--${phase.toLowerCase()}`}>[ INFO] state: {phase}</span>
       <span className="status__hint">{hint}</span>
     </div>
   );
 }
 
 /**
- * Bottom bar: one button per box, plus "put back". Also wires up the keyboard:
+ * Bottom bar: one button per box, plus "release". Also wires up the keyboard:
  * keys 1–4 pick a box, Esc puts the held box back. This is also the way
  * keyboard and screen-reader users operate the 3D scene.
  */
@@ -120,11 +119,11 @@ function CommandBar() {
         const pickable = phase === PHASES.IDLE || (phase === PHASES.FOCUS && !held);
         return (
           <button key={s.id} className={`cmd${held ? ' cmd--active' : ''}`} disabled={!pickable} onClick={() => selectBox(s.id)}>
-            [{n + 1}] {s.id}
+            [{n + 1}]
           </button>
         );
       })}
-      <button className="cmd cmd--release" disabled={phase !== PHASES.FOCUS} onClick={releaseBox}>[esc] put back</button>
+      <button className="cmd cmd--release" disabled={phase !== PHASES.FOCUS} onClick={releaseBox}>release</button>
     </nav>
   );
 }

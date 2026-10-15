@@ -37,7 +37,7 @@ const _hit = new THREE.Vector3();
 // reach, but keep following until 100%. Without this gap the arm would flicker
 // between "tracking" and "home" when the cursor sits right on the boundary.
 const ENGAGE = 0.92;
-const COMFORT = 0.9; // fraction of the arm's full stretch we are willing to use
+const COMFORT = 0.6; // fraction of the arm's full stretch we are willing to use
 
 // Define the offset in one place so visual geometry and IK stay in sync
 const TOOL_POSITION = new THREE.Vector3(0.48, 0, -0.02);

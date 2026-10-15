@@ -9,14 +9,15 @@
 import { useEffect, useState } from 'react';
 
 const LINES = [
-  '[ INFO] roscore: master started on http://localhost:11311',
-  '[ OK ] urdf_parser: loaded KUMA R-9000S (4 active joints)',
-  '[ OK ] joint_1 yaw ............. calibrated  0.000 rad',
-  '[ OK ] joint_2 shoulder ........ calibrated  0.000 rad',
-  '[ OK ] joint_3 elbow ........... calibrated  0.000 rad',
-  '[ OK ] joint_4 wrist ........... calibrated  0.000 rad',
+  '[ INFO] ros2 daemon: The daemon is running.',
+  '[ OK ] urdf_parser: loaded KUMA R-9000S (5 active joints)',
+  '[ OK ] joint_1 yaw ............. calibrated',
+  '[ OK ] joint_2 shoulder ........ calibrated',
+  '[ OK ] joint_3 elbow ........... calibrated',
+  '[ OK ] joint_4 wrist1 .......... calibrated',
+  '[ OK ] joint_5 wrist2 .......... calibrated',
+  '[ OK ] vacuum_gripper: armed',
   '[ OK ] ik_solver: damped least squares, tolerance 0.03',
-  '[ OK ] vacuum_gripper: 7 cups, armed',
   '[ OK ] camera_rig: perspective fov=40',
   '[ INFO] state_machine: IDLE',
 ];
@@ -52,10 +53,9 @@ export default function BootScreen({ sceneReady, onDone }) {
     <div className={`boot${leaving ? ' boot--leaving' : ''}`} role="status" aria-live="polite">
       <pre className="boot__log">
         {LINES.slice(0, shown).join('\n')}
-        {allPrinted && !sceneReady && <span className="boot__warn">{'\n[ WAIT] loading robot model...'}</span>}
+        {allPrinted && !sceneReady && <span className="boot__warn">{'\n[ WARN ] loading robot model...'}</span>}
         <span className="cursor" />
       </pre>
-      <button className="boot__skip" onClick={() => setShown(LINES.length)}>Skip</button>
     </div>
   );
 }

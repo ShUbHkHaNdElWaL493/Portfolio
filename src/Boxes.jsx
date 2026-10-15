@@ -71,10 +71,6 @@ function paintFace(section, index, px, body) {
   while (g.measureText(title).width > 940 && size > 30) g.font = `bold ${--size}px ${FONT}`;
   g.fillStyle = BG;
   g.fillText(title, 40, 10 + HEADER / 2 + size * 0.34);
-
-  // Small label in the corner: "BOX 02/04".
-  g.fillStyle = DIM; g.font = `bold 30px ${FONT}`; g.textAlign = 'right';
-  g.fillText(`BOX ${String(index + 1).padStart(2, '0')}/${String(SECTIONS.length).padStart(2, '0')}`, 990, 1000);
   g.textAlign = 'left';
 
   if (body) {

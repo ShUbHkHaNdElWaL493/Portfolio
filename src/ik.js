@@ -40,9 +40,17 @@ export const JOINTS = [
   { name: 'yaw',          bone: 'Shoulder_01',    axis: [0, 1, 0], min: -270, max: 270 },
   { name: 'shoulder',     bone: 'Core_02',        axis: [0, 0, 1], min: -180, max: 0 },
   { name: 'elbow',        bone: 'ArmLong_05',     axis: [0, 0, 1], min: -45, max: 225 },
-  { name: 'wrist_pitch',  bone: 'ArmShort_07',    axis: [0, 0, 1], min: -45, max: 45 },
-  { name: 'wrist_pitch2', bone: 'ArmShorter_08',  axis: [0, 0, 1], min: -45, max: 45 },
+  { name: 'wrist_pitch',  bone: 'ArmShort_07',    axis: [0, 0, 1], min: -60, max: 60 },
+  { name: 'wrist_pitch2', bone: 'ArmShorter_08',  axis: [0, 0, 1], min: -120, max: 120 },
 ];
+
+// export const JOINTS = [
+//   { name: 'yaw',          bone: 'Shoulder_01',    axis: [0, 1, 0], min: -360, max: 360 },
+//   { name: 'shoulder',     bone: 'Core_02',        axis: [0, 0, 1], min: -360, max: 360 },
+//   { name: 'elbow',        bone: 'ArmLong_05',     axis: [0, 0, 1], min: -360, max: 360 },
+//   { name: 'wrist_pitch',  bone: 'ArmShort_07',    axis: [0, 0, 1], min: -360, max: 360 },
+//   { name: 'wrist_pitch2', bone: 'ArmShorter_08',  axis: [0, 0, 1], min: -360, max: 360 },
+// ];
 
 /** The direction the tool must point in: straight down. */
 const DOWN = new THREE.Vector3(0, -1, 0);
