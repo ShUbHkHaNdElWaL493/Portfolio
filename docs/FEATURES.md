@@ -1,6 +1,6 @@
 # Portfolio Features & UX
 
-This document details the user experience, interactive elements, and feature set of the 3D robotics portfolio.
+This document details the user experience, interactive elements, and feature set of the portfolio.
 
 ---
 

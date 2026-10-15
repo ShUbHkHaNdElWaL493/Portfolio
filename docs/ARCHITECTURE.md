@@ -1,6 +1,6 @@
 # System Architecture
 
-This document outlines the technical architecture, technology stack, 3D rendering pipeline, and state-driven interaction model for the interactive robotics engineering portfolio.
+This document outlines the technical architecture, technology stack, 3D rendering pipeline, and state-driven interaction model for the portfolio.
 
 ---
 
